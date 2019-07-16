@@ -169,7 +169,8 @@ namespace DocFX.Repository.Sweeper.Core
         static string CleanMatching(string value)
         {
             if (string.IsNullOrWhiteSpace(value) ||
-                value.StartsWith("http", StringComparison.OrdinalIgnoreCase) ||
+                value.StartsWith("http:", StringComparison.OrdinalIgnoreCase) ||
+                value.StartsWith("https:", StringComparison.OrdinalIgnoreCase) ||
                 value.StartsWith("#"))
             {
                 return null;
