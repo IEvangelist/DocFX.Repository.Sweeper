@@ -29,7 +29,6 @@ namespace DocFX.Repository.Sweeper.Core
             }
 
             var allTokensInMap = tokenMap.SelectMany(kvp => kvp.Value).Where(t => t.TotalReferences > 0);
-
             WriteLine($"Spent {stopwatch.Elapsed.ToHumanReadableString()} tokenizing files.", ConsoleColor.Red);
 
             var typeStopwatch = new Stopwatch();
@@ -44,39 +43,35 @@ namespace DocFX.Repository.Sweeper.Core
                 WriteLine($"\nProcessing {key} files", ConsoleColor.Cyan);
 
                 Parallel.ForEach(
-                    allTokens.Where(token => IsTokenWithinScopedDirectory(token, options.SourceDirectory, directoryStringLength))
-                             .OrderBy(token => token.FilePath)
+                    allTokens.OrderBy(token => token.FilePath)
                              .Where(token =>
                                     token.IsRelevant &&
                                     !IsTokenReferencedAnywhere(token, allTokensInMap)),
                     token =>
-                {
-
-                    if (token.FileType != FileType.Yaml)
                     {
-                        var relative = directory.MakeRelativeUri(new Uri(token.FilePath)).ToString();
-                        Console.WriteLine($"The \"{relative}\" file is not referenced anywhere.");
-                    }
+                        switch (token.FileType)
+                        {
+                            case FileType.Markdown:
+                                if (options.FindOrphanedTopics &&
+                                    IsTokenWithinScopedDirectory(token, options.SourceDirectory, directoryStringLength))
+                                {
+                                    WriteNonReferencedFileToOutput(token, directory);
+                                    orphanedTopics.Add(token.FilePath);
+                                    token.IsMarkedForDeletion = options.Delete;
+                                }
+                                break;
 
-                    switch (token.FileType)
-                    {
-                        case FileType.Markdown:
-                            if (options.FindOrphanedTopics)
-                            {
-                                orphanedTopics.Add(token.FilePath);
-                                token.IsMarkedForDeletion = options.Delete;
-                            }
-                            break;
-
-                        case FileType.Image:
-                            if (options.FindOrphanedTopics)
-                            {
-                                orphanedImages.Add(token.FilePath);
-                                token.IsMarkedForDeletion = options.Delete;
-                            }
-                            break;
-                    }
-                });
+                            case FileType.Image:
+                                if (options.FindOrphanedImages &&
+                                    IsTokenWithinScopedDirectory(token, options.SourceDirectory, directoryStringLength))
+                                {
+                                    WriteNonReferencedFileToOutput(token, directory);
+                                    orphanedImages.Add(token.FilePath);
+                                    token.IsMarkedForDeletion = options.Delete;
+                                }
+                                break;
+                        }
+                    });
 
                 typeStopwatch.Stop();
                 WriteLine($"Processed {key} files in {typeStopwatch.Elapsed.ToHumanReadableString()}", ConsoleColor.Cyan);
@@ -89,6 +84,15 @@ namespace DocFX.Repository.Sweeper.Core
             if (options.FindOrphanedTopics)
             {
                 HandleFoundFiles(orphanedTopics, FileType.Markdown, options.Delete, ConsoleColor.Yellow);
+            }
+        }
+
+        private static void WriteNonReferencedFileToOutput(FileToken token, Uri directory)
+        {
+            if (token.FileType != FileType.Yaml)
+            {
+                var relative = directory.MakeRelativeUri(new Uri(token.FilePath)).ToString();
+                Console.WriteLine($"The \"{relative}\" file is not referenced anywhere.");
             }
         }
 

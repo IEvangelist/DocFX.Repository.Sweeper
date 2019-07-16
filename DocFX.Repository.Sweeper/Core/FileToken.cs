@@ -10,12 +10,13 @@ namespace DocFX.Repository.Sweeper.Core
 {
     class FileToken
     {
-        static readonly Regex MarkdownLinkRegex = new Regex(@"\\[(.+)\\]\\(\\K(.+)(?=\\))");
+        static readonly Regex MarkdownLinkRegex = new Regex(@"\[(.+)\]\((.+)(?=\))");
         static readonly Regex MarkdownImageLinkRegex = new Regex(@"\!\[(.*?)\][\[\(](.*?)[\ \]\)]");
         static readonly Regex MarkdownIncludeLinkRegex = new Regex(@"\[\!(.*?)\][\[\(](.*?)[\ \]\)]");
         static readonly Regex LinkAttributeRegex = new Regex("(?<=src=\"|href=\")(.*?)(?=\")");
         static readonly Regex YamlLinkRegex = new Regex(@"href:.+?(?'link'.*)");
         static readonly Regex YamlSrcLinkRegex = new Regex(@"src:.+?(?'link'.*)");
+        static readonly Regex FileExtensionRegex = new Regex("(\\.\\w+$)");
 
         readonly FileInfo _fileInfo;
         readonly Lazy<Task<string[]>> _readAllLinesTask;
@@ -29,7 +30,7 @@ namespace DocFX.Repository.Sweeper.Core
 
             if (FileType == FileType.Markdown || FileType == FileType.Yaml)
             {
-                _readAllLinesTask = 
+                _readAllLinesTask =
                     new Lazy<Task<string[]>>(() => File.ReadAllLinesAsync(_fileInfo?.FullName));
             }
         }
@@ -56,12 +57,17 @@ namespace DocFX.Repository.Sweeper.Core
                     return FilePath;
 
                 default:
-                    return "Non-relevant file...";
+                    return "For all intents and purposes, this is a meaningless file.";
             }
         }
 
         internal bool HasReferenceTo(FileToken other)
         {
+            if (TotalReferences == 0)
+            {
+                return false;
+            }
+
             switch (other.FileType)
             {
                 case FileType.Markdown:
@@ -115,14 +121,14 @@ namespace DocFX.Repository.Sweeper.Core
                 case FileType.Markdown:
                     yield return MarkdownLinkRegex;
                     yield return MarkdownImageLinkRegex;
-                    yield return LinkAttributeRegex;
                     yield return MarkdownIncludeLinkRegex;
+                    yield return LinkAttributeRegex;
                     break;
 
                 case FileType.Yaml:
                     yield return YamlLinkRegex;
-                    yield return LinkAttributeRegex;
                     yield return YamlSrcLinkRegex;
+                    yield return LinkAttributeRegex;
                     break;
 
                 default:
@@ -156,16 +162,25 @@ namespace DocFX.Repository.Sweeper.Core
                 expressions.SelectMany(ex => ex.Matches(line).Cast<Match>())
                            .Select(GetMatchingValue))
             {
-                if (string.IsNullOrWhiteSpace(value) ||
-                    value.Contains("http") ||
-                    value.StartsWith("#"))
-                {
-                    yield return null;
-                }
-
-                var cleaned = StripQueryStringOrHeaderLink(value);
-                yield return cleaned.Contains(".") ? cleaned : $"{cleaned}.md";
+                yield return CleanMatching(value);
             }
+        }
+
+        static string CleanMatching(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value) ||
+                value.Contains("http") ||
+                value.StartsWith("#"))
+            {
+                return null;
+            }
+
+            var cleaned =
+                StripQueryStringOrHeaderLink(value)
+                    .Replace("~", "..")
+                    .Replace("/azure/", "/articles/");
+
+            return FileExtensionRegex.IsMatch(cleaned) ? cleaned : $"{cleaned}.md";
         }
 
         static string StripQueryStringOrHeaderLink(string value)
