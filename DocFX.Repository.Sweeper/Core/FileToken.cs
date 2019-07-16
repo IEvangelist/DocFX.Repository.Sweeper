@@ -169,10 +169,15 @@ namespace DocFX.Repository.Sweeper.Core
         static string CleanMatching(string value)
         {
             if (string.IsNullOrWhiteSpace(value) ||
-                value.Contains("http") ||
+                value.StartsWith("http", StringComparison.OrdinalIgnoreCase) ||
                 value.StartsWith("#"))
             {
                 return null;
+            }
+
+            if (value.StartsWith("./"))
+            {
+                value = value.Replace("./", "");
             }
 
             var cleaned =
