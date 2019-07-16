@@ -176,7 +176,7 @@ namespace DocFX.Repository.Sweeper.Core
             }
 
             var cleaned =
-                StripQueryStringOrHeaderLink(value)
+                StripQueryStringOrHeaderLink(value.Trim())
                     .Replace("~", "..")
                     .Replace("/azure/", "/articles/");
 
