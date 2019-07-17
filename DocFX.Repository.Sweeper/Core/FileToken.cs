@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -10,7 +11,7 @@ namespace DocFX.Repository.Sweeper.Core
 {
     class FileToken
     {
-        static readonly Regex MarkdownLinkRegex = new Regex(@"\[(.+)\]\((.+)(?=\))");
+        static readonly Regex MarkdownLinkRegex = new Regex(@"[^!]\[.+?\]\((.+?)\)");
         static readonly Regex MarkdownImageLinkRegex = new Regex(@"\!\[(.*?)\][\[\(](.*?)[\ \]\)]");
         static readonly Regex MarkdownIncludeLinkRegex = new Regex(@"\[\!(.*?)\][\[\(](.*?)[\ \]\)]");
         static readonly Regex LinkAttributeRegex = new Regex("(?<=src=\"|href=\")(.*?)(?=\")");
@@ -136,7 +137,7 @@ namespace DocFX.Repository.Sweeper.Core
             }
         }
 
-        static IEnumerable<string> FindAllLinksInLine(string line, IEnumerable<Regex> expressions)
+        IEnumerable<string> FindAllLinksInLine(string line, IEnumerable<Regex> expressions)
         {
             string GetMatchingValue(Match match)
             {
@@ -166,7 +167,7 @@ namespace DocFX.Repository.Sweeper.Core
             }
         }
 
-        static string CleanMatching(string value)
+        string CleanMatching(string value)
         {
             if (string.IsNullOrWhiteSpace(value) ||
                 value.StartsWith("http:", StringComparison.OrdinalIgnoreCase) ||
@@ -174,6 +175,11 @@ namespace DocFX.Repository.Sweeper.Core
                 value.StartsWith("#"))
             {
                 return null;
+            }
+
+            if (FilePath.EndsWith("GraphSearchMethod.md"))
+            {
+                Debugger.Break();
             }
 
             if (value.StartsWith("./"))
