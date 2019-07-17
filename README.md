@@ -8,8 +8,8 @@ The `DocFX.Repository.Sweeper` (**sweeper**) is a tool for sweeping **DocFX** re
 
 This command-line tool helps to identify (and optionally delete) files within a **DocFX** repository that are not referenced by any other file.
 
-  - [:heavy_check_mark:] Find (and delete) markdown files not referenced in TOC, index, or other markdown files
-  - [x] Find (and delete) image files not referenced in TOC, index, or other markdown files
+  - Find (and delete) markdown files not referenced in TOC, index, or other markdown files
+  - Find (and delete) image files not referenced in TOC, index, or other markdown files
 
 ### The approach
 
