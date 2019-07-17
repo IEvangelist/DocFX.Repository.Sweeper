@@ -26,7 +26,7 @@ namespace DocFX.Repository.Sweeper.Core
         readonly HashSet<string> _imagesReferenced = new HashSet<string>();
         readonly HashSet<string> _topicsReferenced = new HashSet<string>();
 
-        internal FileToken(FileInfo file)
+        public FileToken(FileInfo file)
         {
             _fileInfo = file;
             FileType = _fileInfo.GetFileType();
@@ -38,13 +38,13 @@ namespace DocFX.Repository.Sweeper.Core
             }
         }
 
-        internal string FilePath => _fileInfo?.FullName;
-        internal FileType FileType { get; }
-        internal ISet<string> TopicsReferenced => _topicsReferenced;
-        internal ISet<string> ImagesReferenced => _imagesReferenced;
-        internal int TotalReferences => TopicsReferenced.Count + ImagesReferenced.Count;
-        internal bool IsRelevant => FileType != FileType.NotRelevant && FileType != FileType.Json;
-        internal bool IsMarkedForDeletion { get; set; }
+        public string FilePath => _fileInfo?.FullName;
+        public FileType FileType { get; }
+        public ISet<string> TopicsReferenced => _topicsReferenced;
+        public ISet<string> ImagesReferenced => _imagesReferenced;
+        public int TotalReferences => TopicsReferenced.Count + ImagesReferenced.Count;
+        public bool IsRelevant => FileType != FileType.NotRelevant && FileType != FileType.Json;
+        public bool IsMarkedForDeletion { get; set; }
 
         public override string ToString()
         {
@@ -64,7 +64,7 @@ namespace DocFX.Repository.Sweeper.Core
             }
         }
 
-        internal bool HasReferenceTo(FileToken other)
+        public bool HasReferenceTo(FileToken other)
         {
             if (TotalReferences == 0)
             {
@@ -85,7 +85,7 @@ namespace DocFX.Repository.Sweeper.Core
             }
         }
 
-        internal async Task InitializeAsync()
+        public async Task InitializeAsync()
         {
             if (_readAllLinesTask is null)
             {

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
@@ -7,27 +7,53 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="TestRepo\grandparent\grandparent-topic.md" />
-    <None Remove="TestRepo\grandparent\media\csharp-logo.png" />
-    <None Remove="TestRepo\grandparent\parent\child\child-topic.md" />
-    <None Remove="TestRepo\grandparent\parent\includes\partial-topic.md" />
-    <None Remove="TestRepo\grandparent\parent\parent-topic.md" />
+    <None Remove="all-possible-refs.md" />
+    <None Remove="docs-repo\grandparent\grandparent-topic.md" />
+    <None Remove="docs-repo\grandparent\media\csharp-logo.png" />
+    <None Remove="docs-repo\grandparent\parent\child\child-topic.md" />
+    <None Remove="docs-repo\grandparent\parent\includes\partial-topic.md" />
+    <None Remove="docs-repo\grandparent\parent\parent-topic.md" />
+    <None Remove="docs-repo\image-one.svg" />
+    <None Remove="docs-repo\image-three.jpg" />
+    <None Remove="docs-repo\image-two.jpeg" />
+    <None Remove="docs-repo\ref-one.md" />
+    <None Remove="docs-repo\ref-three.md" />
+    <None Remove="docs-repo\ref-two.md" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="TestRepo\grandparent\grandparent-topic.md">
+    <Content Include="docs-repo\image-one.svg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="TestRepo\grandparent\media\csharp-logo.png">
+    <Content Include="docs-repo\image-three.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="TestRepo\grandparent\parent\child\child-topic.md">
+    <Content Include="docs-repo\image-two.jpeg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="TestRepo\grandparent\parent\includes\partial-topic.md">
+    <Content Include="docs-repo\ref-three.md" />
+    <Content Include="docs-repo\ref-two.md">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="TestRepo\grandparent\parent\parent-topic.md">
+    <Content Include="docs-repo\ref-one.md">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="docs-repo\all-possible-refs.md">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="docs-repo\grandparent\grandparent-topic.md">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="docs-repo\grandparent\media\csharp-logo.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="docs-repo\grandparent\parent\child\child-topic.md">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="docs-repo\grandparent\parent\includes\partial-topic.md">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="docs-repo\grandparent\parent\parent-topic.md">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
@@ -40,6 +66,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DocFX.Repository.Sweeper\DocFX.Repository.Sweeper.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="docs-repo\ref-three.md">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

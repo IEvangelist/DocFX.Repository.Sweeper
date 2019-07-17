@@ -40,10 +40,12 @@ The **sweeper** executable is a `.NET Core` project and can be executed from the
 
 | Option | Description | Default |
 |--:|:--|:--|
-| `-s` (required) | The source directory to act on (can be subdirectory or top-level) | `null` | 
+| `-s`* | The source directory to act on (can be subdirectory or top-level) | `null` | 
 | `-t` | If true, finds orphaned topic (markdown) files | `true` |
 | `-i` | If true, finds orphaned image files (.png, .jpg, .jpeg, .gif, .svg) | `true` |
 | `-d` | If true, deletes orphaned markdown or image files | `false` |
+
+> * denotes a required option
 
 Executing the following command will find all the files within the `cognitive-serivces` directory that are not referenced anywhere else in the entire repository (relevant to the `docfx.json` file).
 
