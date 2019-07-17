@@ -1,6 +1,6 @@
 ﻿namespace DocFX.Repository.Sweeper.Core
 {
-    enum TokenizationStatus
+    public enum TokenizationStatus
     {
         Error,
         Success

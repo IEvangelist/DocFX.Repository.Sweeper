@@ -9,10 +9,11 @@ using DocFX.Repository.Sweeper.Extensions;
 
 namespace DocFX.Repository.Sweeper.Core
 {
-    class FileToken
+    public class FileToken
     {
         static readonly Regex MarkdownLinkRegex = new Regex(@"[^!]\[.+?\]\((.+?)\)");
         static readonly Regex MarkdownImageLinkRegex = new Regex(@"\!\[(.*?)\][\[\(](.*?)[\ \]\)]");
+        static readonly Regex MarkdownLightboxImageLinkRegex = new Regex(@"\[\!\[(.*?)\][\[\(](.*?)[\ \]\)]\]\((.*?)\)");
         static readonly Regex MarkdownIncludeLinkRegex = new Regex(@"\[\!(.*?)\][\[\(](.*?)[\ \]\)]");
         static readonly Regex LinkAttributeRegex = new Regex("(?<=src=\"|href=\")(.*?)(?=\")");
         static readonly Regex YamlLinkRegex = new Regex(@"href:.+?(?'link'.*)");
@@ -121,6 +122,7 @@ namespace DocFX.Repository.Sweeper.Core
             {
                 case FileType.Markdown:
                     yield return MarkdownLinkRegex;
+                    yield return MarkdownLightboxImageLinkRegex;
                     yield return MarkdownImageLinkRegex;
                     yield return MarkdownIncludeLinkRegex;
                     yield return LinkAttributeRegex;
@@ -139,29 +141,34 @@ namespace DocFX.Repository.Sweeper.Core
 
         IEnumerable<string> FindAllLinksInLine(string line, IEnumerable<Regex> expressions)
         {
-            string GetMatchingValue(Match match)
+            IEnumerable<string> GetMatchingValues(Match match)
             {
                 if (match is null)
                 {
-                    return null;
+                    yield break;
                 }
 
                 if (match.Groups.Any(grp => grp.Name == "link"))
                 {
-                    return match.Groups["link"].Value;
+                    yield return match.Groups["link"].Value;
                 }
 
-                if (match.Groups.Count > 0)
+                if (match.Groups.Count == 3)
                 {
-                    return match.Groups[match.Groups.Count - 1].Value;
+                    yield return match.Groups[1].Value;
+                    yield return match.Groups[2].Value;
+                }
+                else if (match.Groups.Count > 0)
+                {
+                    yield return match.Groups[match.Groups.Count - 1].Value;
                 }
 
-                return match.Value;
+                yield return match.Value;
             }
 
             foreach (var value in
                 expressions.SelectMany(ex => ex.Matches(line).Cast<Match>())
-                           .Select(GetMatchingValue))
+                           .SelectMany(GetMatchingValues))
             {
                 yield return CleanMatching(value);
             }
@@ -175,11 +182,6 @@ namespace DocFX.Repository.Sweeper.Core
                 value.StartsWith("#"))
             {
                 return null;
-            }
-
-            if (FilePath.EndsWith("GraphSearchMethod.md"))
-            {
-                Debugger.Break();
             }
 
             if (value.StartsWith("./"))

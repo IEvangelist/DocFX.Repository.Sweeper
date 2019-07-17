@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 
 namespace DocFX.Repository.Sweeper.Core
 {
-    class RepoSweeper
+    public class RepoSweeper
     {
         readonly FileTokenizer _fileTokenizer = new FileTokenizer();
 
-        internal async Task SweepAsync(Options options, Stopwatch stopwatch)
+        public async Task SweepAsync(Options options, Stopwatch stopwatch)
         {
             var orphanedImages = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var orphanedTopics = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -110,9 +110,9 @@ namespace DocFX.Repository.Sweeper.Core
 
         static bool IsTokenReferencedAnywhere(FileToken fileToken, IEnumerable<FileToken> tokens)
             => tokens.Where(token => token != fileToken)
-                        .Any(otherToken =>
-                            !otherToken.IsMarkedForDeletion &&
-                            otherToken.HasReferenceTo(fileToken));
+                     .Any(otherToken =>
+                         !otherToken.IsMarkedForDeletion &&
+                         otherToken.HasReferenceTo(fileToken));
 
         static bool IsRelevantToken(FileType fileType)
             => fileType != FileType.NotRelevant && fileType != FileType.Json;

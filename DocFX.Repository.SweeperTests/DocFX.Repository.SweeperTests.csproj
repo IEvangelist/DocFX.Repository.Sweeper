@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="TestRepo\grandparent\grandparent-topic.md" />
+    <None Remove="TestRepo\grandparent\media\csharp-logo.png" />
+    <None Remove="TestRepo\grandparent\parent\child\child-topic.md" />
+    <None Remove="TestRepo\grandparent\parent\includes\partial-topic.md" />
+    <None Remove="TestRepo\grandparent\parent\parent-topic.md" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="TestRepo\grandparent\grandparent-topic.md">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestRepo\grandparent\media\csharp-logo.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestRepo\grandparent\parent\child\child-topic.md">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestRepo\grandparent\parent\includes\partial-topic.md">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestRepo\grandparent\parent\parent-topic.md">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.0.1" />
+    <PackageReference Include="xunit" Version="2.4.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DocFX.Repository.Sweeper\DocFX.Repository.Sweeper.csproj" />
+  </ItemGroup>
+
+</Project>

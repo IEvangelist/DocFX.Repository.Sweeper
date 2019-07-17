@@ -1,6 +1,6 @@
 ﻿namespace DocFX.Repository.Sweeper.Core
 {
-    enum FileType
+    public enum FileType
     {
         NotRelevant = 0,
         Markdown = 1,

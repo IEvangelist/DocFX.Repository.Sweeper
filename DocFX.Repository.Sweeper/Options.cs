@@ -2,7 +2,7 @@
 
 namespace DocFX.Repository.Sweeper
 {
-    class Options
+    public class Options
     {
         [Option('s', "directory", Required = true, HelpText = "Directory to start search for markdown files, or the media directory to search in for orphaned .png files, or the directory to search in for orphaned INCLUDE files.")]
         public string SourceDirectory { get; set; }

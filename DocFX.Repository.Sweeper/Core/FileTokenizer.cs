@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace DocFX.Repository.Sweeper.Core
 {
-    class FileTokenizer
+    public class FileTokenizer
     {
-        internal async Task<(TokenizationStatus, IDictionary<FileType, IList<FileToken>>)> TokenizeAsync(Options options)
+        public async Task<(TokenizationStatus, IDictionary<FileType, IList<FileToken>>)> TokenizeAsync(Options options)
         {
             var dir = FindDocFxRootDirectory(new DirectoryInfo(options.SourceDirectory));
             if (dir is null)
