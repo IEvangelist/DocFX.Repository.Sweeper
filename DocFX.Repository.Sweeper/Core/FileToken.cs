@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -11,14 +10,16 @@ namespace DocFX.Repository.Sweeper.Core
 {
     public class FileToken
     {
-        static readonly Regex MarkdownLinkRegex = new Regex(@"[^!]\[.+?\]\((.+?)\)");
-        static readonly Regex MarkdownImageLinkRegex = new Regex(@"\!\[(.*?)\][\[\(](.*?)[\ \]\)]");
-        static readonly Regex MarkdownLightboxImageLinkRegex = new Regex(@"\[\!\[(.*?)\][\[\(](.*?)[\ \]\)]\]\((.*?)\)");
-        static readonly Regex MarkdownIncludeLinkRegex = new Regex(@"\[\!(.*?)\][\[\(](.*?)[\ \]\)]");
-        static readonly Regex LinkAttributeRegex = new Regex("(?<=src=\"|href=\")(.*?)(?=\")");
-        static readonly Regex YamlLinkRegex = new Regex(@"href:.+?(?'link'.*)");
-        static readonly Regex YamlSrcLinkRegex = new Regex(@"src:.+?(?'link'.*)");
-        static readonly Regex FileExtensionRegex = new Regex("(\\.\\w+$)");
+        static readonly RegexOptions Options = RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase;
+
+        static readonly Regex MarkdownLinkRegex = new Regex(@"[^!]\[.+?\]\((.+?)\)", Options);
+        static readonly Regex MarkdownImageLinkRegex = new Regex(@"\!\[(.*?)\][\[\(](.*?)[\ \]\)]", Options);
+        static readonly Regex MarkdownLightboxImageLinkRegex = new Regex(@"\[\!\[(.*?)\][\[\(](.*?)[\ \]\)]\]\((.*?)\)", Options);
+        static readonly Regex MarkdownIncludeLinkRegex = new Regex(@"\[\!(.*?)\][\[\(](.*?)[\ \]\)]", Options);
+        static readonly Regex LinkAttributeRegex = new Regex("(?<=src=\"|href=\")(.*?)(?=\")", Options);
+        static readonly Regex YamlLinkRegex = new Regex(@"href:.+?(?'link'.*)", Options);
+        static readonly Regex YamlSrcLinkRegex = new Regex(@"src:.+?(?'link'.*)", Options);
+        static readonly Regex FileExtensionRegex = new Regex("(\\.\\w+$)", Options);
 
         readonly FileInfo _fileInfo;
         readonly Lazy<Task<string[]>> _readAllLinesTask;
