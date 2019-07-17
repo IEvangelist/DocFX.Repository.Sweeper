@@ -27,3 +27,10 @@ Blah blah... blah (see the [Follow this...](ref-two.md) for blah... then blah).
 [![two](../docs-repo/image-two.jpeg)](./image-three.jpg#lightbox)
 
 [!INCLUDE [ref-three](~/docs-repo/ref-three.md)]
+
+![image four][1]
+
+[ref four][2]
+
+[1]: ./image-four.png
+[2]: ref-four.md

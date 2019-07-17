@@ -124,6 +124,11 @@ namespace DocFX.Repository.Sweeper.Core
                 Console.WriteLine();
                 WriteLine($"Found {files.Count:#,#} orphaned {type} files.", color);
 
+                foreach (var (ext, count) in files.GroupBy(Path.GetExtension).Select(grp => (grp.Key, grp.Count())))
+                {
+                    WriteLine($"\t[found {ext} {count:#,#} files]", color);
+                }
+
                 if (delete)
                 {
                     foreach (var file in files.Where(File.Exists))

@@ -2,26 +2,28 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
-
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="all-possible-refs.md" />
-    <None Remove="docs-repo\grandparent\grandparent-topic.md" />
-    <None Remove="docs-repo\grandparent\media\csharp-logo.png" />
-    <None Remove="docs-repo\grandparent\parent\child\child-topic.md" />
-    <None Remove="docs-repo\grandparent\parent\includes\partial-topic.md" />
-    <None Remove="docs-repo\grandparent\parent\parent-topic.md" />
-    <None Remove="docs-repo\image-one.svg" />
-    <None Remove="docs-repo\image-three.jpg" />
-    <None Remove="docs-repo\image-two.jpeg" />
-    <None Remove="docs-repo\ref-one.md" />
-    <None Remove="docs-repo\ref-three.md" />
-    <None Remove="docs-repo\ref-two.md" />
+    <None Remove="docs-repo\image-four.png" />
+    <None Remove="docs-repo\ref-four.md" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.0.1" />
+    <PackageReference Include="xunit" Version="2.4.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DocFX.Repository.Sweeper\DocFX.Repository.Sweeper.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="docs-repo\image-four.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="docs-repo\image-one.svg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -31,7 +33,12 @@
     <Content Include="docs-repo\image-two.jpeg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="docs-repo\ref-three.md" />
+    <Content Include="docs-repo\ref-four.md">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="docs-repo\ref-three.md">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="docs-repo\ref-two.md">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -54,22 +61,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="docs-repo\grandparent\parent\parent-topic.md">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.0.1" />
-    <PackageReference Include="xunit" Version="2.4.0" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\DocFX.Repository.Sweeper\DocFX.Repository.Sweeper.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Update="docs-repo\ref-three.md">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

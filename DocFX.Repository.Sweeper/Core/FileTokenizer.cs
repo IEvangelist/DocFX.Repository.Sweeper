@@ -19,20 +19,23 @@ namespace DocFX.Repository.Sweeper.Core
 
             var map = new ConcurrentDictionary<FileType, IList<FileToken>>();
 
-            await dir.EnumerateFiles("*.*", SearchOption.AllDirectories).ForEachAsync(50, async file =>
-            {
-                var fileToken = new FileToken(file);
-                await fileToken.InitializeAsync();
+            await dir.EnumerateFiles("*.*", SearchOption.AllDirectories)
+                     .ForEachAsync(
+                         Environment.ProcessorCount,
+                         async file =>
+                         {
+                             var fileToken = new FileToken(file);
+                             await fileToken.InitializeAsync();
 
-                if (map.TryGetValue(fileToken.FileType, out var tokens))
-                {
-                    tokens.Add(fileToken);
-                }
-                else
-                {
-                    map[fileToken.FileType] = new List<FileToken> { fileToken };
-                }
-            });
+                             if (map.TryGetValue(fileToken.FileType, out var tokens))
+                             {
+                                 tokens.Add(fileToken);
+                             }
+                             else
+                             {
+                                 map[fileToken.FileType] = new List<FileToken> { fileToken };
+                             }
+                         });
 
             return (TokenizationStatus.Success, map);
         }

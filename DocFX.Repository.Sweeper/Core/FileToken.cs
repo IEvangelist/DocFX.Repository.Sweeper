@@ -16,6 +16,7 @@ namespace DocFX.Repository.Sweeper.Core
         static readonly Regex MarkdownImageLinkRegex = new Regex(@"\!\[(.*?)\][\[\(](.*?)[\ \]\)]", Options);
         static readonly Regex MarkdownLightboxImageLinkRegex = new Regex(@"\[\!\[(.*?)\][\[\(](.*?)[\ \]\)]\]\((.*?)\)", Options);
         static readonly Regex MarkdownIncludeLinkRegex = new Regex(@"\[\!(.*?)\][\[\(](.*?)[\ \]\)]", Options);
+        static readonly Regex MarkdownReferenceLinkRegex = new Regex(@"\[.*\]:(.*)", Options);
         static readonly Regex LinkAttributeRegex = new Regex("(?<=src=\"|href=\")(.*?)(?=\")", Options);
         static readonly Regex YamlLinkRegex = new Regex(@"href:.+?(?'link'.*)", Options);
         static readonly Regex YamlSrcLinkRegex = new Regex(@"src:.+?(?'link'.*)", Options);
@@ -126,6 +127,7 @@ namespace DocFX.Repository.Sweeper.Core
                     yield return MarkdownLightboxImageLinkRegex;
                     yield return MarkdownImageLinkRegex;
                     yield return MarkdownIncludeLinkRegex;
+                    yield return MarkdownReferenceLinkRegex;
                     yield return LinkAttributeRegex;
                     break;
 
