@@ -14,9 +14,9 @@ namespace DocFX.Repository.SweeperTests
             var token = new FileToken(new FileInfo($"{dir}/all-possible-refs.md"));
             await token.InitializeAsync();
 
-            Assert.Equal(10, token.TotalReferences);
+            Assert.Equal(11, token.TotalReferences);
             Assert.Equal(5, token.ImagesReferenced.Count);
-            Assert.Equal(5, token.TopicsReferenced.Count);
+            Assert.Equal(6, token.TopicsReferenced.Count);
 
             foreach (var otherToken in
                 new[]
@@ -26,6 +26,7 @@ namespace DocFX.Repository.SweeperTests
                     new FileToken(new FileInfo($"{dir}/ref-three.md")),
                     new FileToken(new FileInfo($"{dir}/ref-four.md")),
                     new FileToken(new FileInfo($"{dir}/ref-five.md")),
+                    new FileToken(new FileInfo($"{dir}/subdir/ref-six.md")),
                     new FileToken(new FileInfo($"{dir}/image-one.svg")),
                     new FileToken(new FileInfo($"{dir}/image-two.jpeg")),
                     new FileToken(new FileInfo($"{dir}/image-three.jpg")),

@@ -156,7 +156,7 @@ namespace DocFX.Repository.Sweeper.Core
 
             if (value.StartsWith("./"))
             {
-                value = value.Replace("./", "");
+                value = value.Substring(2);
             }
 
             var cleaned =

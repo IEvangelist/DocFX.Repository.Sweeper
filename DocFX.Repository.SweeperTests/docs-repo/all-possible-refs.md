@@ -34,6 +34,8 @@ Blah blah... blah (see the [Follow this...](ref-two.md) for blah... then blah).
 
 [ref five][Contact]
 
+blah blah...(blah, ...) see the [ref six](./../subdir/ref-six.md?toc=%2fcli%2fmodule%2ftoc.json) script.
+
 [1]: ./image-four.png
 [2]: ref-four.md
 
