@@ -44,15 +44,19 @@ The **sweeper** executable is a `.NET Core` project and can be executed from the
 | `-t` | If true, finds orphaned topic (markdown) files | `true` |
 | `-i` | If true, finds orphaned image files (.png, .jpg, .jpeg, .gif, .svg) | `true` |
 | `-d` | If true, deletes orphaned markdown or image files | `false` |
-| `-o` | If true, writes the deleted file paths as outpu | `false` |
+| `-o` | If true, writes the deleted file paths as output | `false` |
 
 > <sup>*</sup> denotes a required option
 
-Executing the following command will find all the files within the `cognitive-serivces` directory that are not referenced anywhere else in the entire repository (relevant to the `docfx.json` file).
+Executing the following command will find all the files within the `articles` directory that are not referenced anywhere else in the entire repository (relevant to the `docfx.json` file).
 
 ```
-dotnet sweeper.dll -s "C:\repo\azure-docs-pr\articles\cognitive-services"
+dotnet sweeper.dll -s "C:\repo\azure-docs-pr\articles\"
 ```
+
+Here is an example output:
+
+![Example output](example-output.png)
 
 ## :poop: Toubleshooting
 

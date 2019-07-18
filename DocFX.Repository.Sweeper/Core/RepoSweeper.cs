@@ -33,7 +33,8 @@ namespace DocFX.Repository.Sweeper.Core
             }
 
             var allTokensInMap = tokenMap.SelectMany(kvp => kvp.Value).Where(t => t.TotalReferences > 0);            
-            Console.WriteLine($"Spent {stopwatch.Elapsed.ToHumanReadableString()} tokenizing files.");            
+            Console.WriteLine($"Spent {stopwatch.Elapsed.ToHumanReadableString()} tokenizing files.");
+            Console.WriteLine();
 
             var typeStopwatch = new Stopwatch();
             foreach (var type in
