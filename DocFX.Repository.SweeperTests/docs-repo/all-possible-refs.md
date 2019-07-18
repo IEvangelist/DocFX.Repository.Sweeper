@@ -15,7 +15,8 @@ ms.author: dapine
 [!INCLUDE [ref-one](ref-one.md)]
 
 2
-![csharp](~/docs-repo/grandparent/media/csharp-logo.png)
+![csharp
+oh no... multiple lines](~/docs-repo/grandparent/media/csharp-logo.png)
 
 3
 ![one](image-one.svg)
@@ -35,6 +36,8 @@ Blah blah... blah (see the [Follow this...](ref-two.md) for blah... then blah).
 [ref five][Contact]
 
 blah blah...(blah, ...) see the [ref six](./../subdir/ref-six.md?toc=%2fcli%2fmodule%2ftoc.json) script.
+
+I really like whitespace, ugh! ![seriously]( ./media/serious.png )
 
 [1]: ./image-four.png
 [2]: ref-four.md
