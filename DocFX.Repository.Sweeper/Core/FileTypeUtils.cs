@@ -10,7 +10,7 @@ namespace DocFX.Repository.Sweeper.Core
         {
             [FileType.Markdown] = new FileTypeUtils { Color = ConsoleColor.Cyan },
             [FileType.Image] = new FileTypeUtils { Color = ConsoleColor.Yellow },
-            [FileType.Yaml] = new FileTypeUtils { Color = ConsoleColor.Blue },
+            [FileType.Yaml] = new FileTypeUtils { Color = ConsoleColor.Magenta },
             [FileType.Json] = new FileTypeUtils { Color = ConsoleColor.DarkGreen },
             [FileType.NotRelevant] = new FileTypeUtils(),
         };

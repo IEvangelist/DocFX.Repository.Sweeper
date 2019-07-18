@@ -104,14 +104,15 @@ namespace DocFX.Repository.Sweeper.Core
                 }
             }
 
-            if (options.FindOrphanedImages)
-            {
-                HandleFoundFiles(orphanedImages, FileType.Image, options);
-            }
             if (options.FindOrphanedTopics)
             {
                 HandleFoundFiles(orphanedTopics, FileType.Markdown, options);
             }
+
+            if (options.FindOrphanedImages)
+            {
+                HandleFoundFiles(orphanedImages, FileType.Image, options);
+            }            
 
             return new SweepSummary
             {

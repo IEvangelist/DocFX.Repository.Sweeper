@@ -8,7 +8,9 @@
 
         public int TotalCrossReferences { get; set; }
 
-        public override string ToString() 
-            => $"Out of the {TotalFilesProcessed:#,#} files processed, there were {TotalCrossReferences:#,#} cross references evaluated.";
+        public override string ToString()
+            => Status == TokenizationStatus.Success 
+            ? $"[ SUCCESS ]: Out of the {TotalFilesProcessed:#,#} files processed, there were {TotalCrossReferences:#,#} cross references evaluated."
+            : "[ FAILED ]";
     }
 }
