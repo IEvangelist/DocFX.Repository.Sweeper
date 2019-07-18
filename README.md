@@ -63,3 +63,7 @@ Here is an example output:
 ```
 // TODO: add details about using Git to undo issues that may arrise
 ```
+
+## The future
+
+  - Automatically update the `.openpublishing.redirection.json` when orphaned topics are deleted.

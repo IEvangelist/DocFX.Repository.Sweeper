@@ -32,7 +32,7 @@ namespace DocFX.Repository.Sweeper.Core
                 return new SweepSummary { Status = status };
             }
 
-            var allTokensInMap = tokenMap.SelectMany(kvp => kvp.Value).Where(t => t.TotalReferences > 0);            
+            var allTokensInMap = tokenMap.SelectMany(kvp => kvp.Value).Where(t => t.TotalReferences > 0);
             Console.WriteLine($"Spent {stopwatch.Elapsed.ToHumanReadableString()} tokenizing files.");
             Console.WriteLine();
 
@@ -45,7 +45,6 @@ namespace DocFX.Repository.Sweeper.Core
                 var allTokens = tokenMap[type];
 
                 typeStopwatch.Restart();
-                type.WriteLine($"Processing {type} files");
 
                 var tokens = allTokens.Where(token => token.IsRelevant);
                 var count = 0;
@@ -55,6 +54,8 @@ namespace DocFX.Repository.Sweeper.Core
                     count = tokens.Count();
                     spinner.Succeed();
                 }, Patterns.Arc);
+
+                type.WriteLine($"Processing {type} files");
 
                 using (var progressBar =
                     new ProgressBar(
@@ -112,7 +113,7 @@ namespace DocFX.Repository.Sweeper.Core
             if (options.FindOrphanedImages)
             {
                 HandleFoundFiles(orphanedImages, FileType.Image, options);
-            }            
+            }
 
             return new SweepSummary
             {
@@ -149,7 +150,7 @@ namespace DocFX.Repository.Sweeper.Core
             {
                 type.WriteLine($"Found {files.Count:#,#} orphaned {type} files.");
 
-                foreach (var (ext, count) in 
+                foreach (var (ext, count) in
                     files.Select(file => Path.GetExtension(file).ToLower())
                          .GroupBy(ext => ext)
                          .Select(grp => (grp.Key, grp.Count())))
