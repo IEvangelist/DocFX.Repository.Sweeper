@@ -1,4 +1,5 @@
 ﻿using DocFX.Repository.Sweeper.Extensions;
+using DocFX.Repository.Sweeper.OpenPublishing;
 using Kurukuru;
 using ShellProgressBar;
 using System;
@@ -107,12 +108,12 @@ namespace DocFX.Repository.Sweeper.Core
 
             if (options.FindOrphanedTopics)
             {
-                HandleFoundFiles(orphanedTopics, FileType.Markdown, options);
+                await HandleFoundFilesAsync(orphanedTopics, FileType.Markdown, options);
             }
 
             if (options.FindOrphanedImages)
             {
-                HandleFoundFiles(orphanedImages, FileType.Image, options);
+                await HandleFoundFilesAsync(orphanedImages, FileType.Image, options);
             }
 
             return new SweepSummary
@@ -144,7 +145,7 @@ namespace DocFX.Repository.Sweeper.Core
         static bool IsRelevantToken(FileType fileType)
             => fileType != FileType.NotRelevant && fileType != FileType.Json;
 
-        static void HandleFoundFiles(ISet<string> files, FileType type, Options options)
+        static async Task HandleFoundFilesAsync(ISet<string> files, FileType type, Options options)
         {
             if (files.Any())
             {
@@ -160,6 +161,12 @@ namespace DocFX.Repository.Sweeper.Core
 
                 if (options.Delete)
                 {
+                    if (type == FileType.Markdown)
+                    {
+                        await Task.CompletedTask;
+                        // await HandleRedirectionAsync(files, options);
+                    }
+
                     foreach (var file in files.Where(File.Exists))
                     {
                         if (options.OutputDeletedFiles)
@@ -175,6 +182,44 @@ namespace DocFX.Repository.Sweeper.Core
 
                 Console.WriteLine();
             }
+        }
+
+        static async Task HandleRedirectionAsync(ISet<string> files, Options options)
+        {
+            var redirection = 
+                await FindFileAsync<Redirection>(
+                    ".openpublishing.redirection.json",
+                    options.SourceDirectory);
+
+            if (redirection?.Redirections.Any() ?? false)
+            {
+
+                // foreach file order by path
+                // get directory
+                // from dir find TOC.yml, if there is not an INDEX.yml file... then find the top-level .md
+                // If the INDEX contains "documentType: LandingData" then we're done
+
+                // EXAMPLE:
+                // 
+                // { 
+                //     "source_path": "articles/cognitive-services/Computer-vision/QuickStarts/curl-disk.md",
+                //     "redirect_url": "/azure/cognitive-services/computer-vision",
+                //     "redirect_document_id": false
+                // }
+            }
+        }
+
+        private static async Task<T> FindFileAsync<T>(string filename, string directory)
+        {
+            var dir = new DirectoryInfo(directory).TraverseToFile(filename);
+            var filepath = Path.Combine(dir.FullName, filename);
+            if (File.Exists(filepath))
+            {
+                var json = await File.ReadAllTextAsync(filepath);
+                return json.FromJson<T>();
+            }
+
+            return default;
         }
     }
 }

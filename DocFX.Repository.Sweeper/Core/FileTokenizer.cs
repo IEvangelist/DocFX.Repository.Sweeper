@@ -15,7 +15,7 @@ namespace DocFX.Repository.Sweeper.Core
         public async Task<(TokenizationStatus, IDictionary<FileType, IList<FileToken>>)> TokenizeAsync(Options options)
         {
             var directoryLength = options.SourceDirectory.Length;
-            var dir = FindDocFxRootDirectory(new DirectoryInfo(options.SourceDirectory));
+            var dir = new DirectoryInfo(options.SourceDirectory).TraverseToFile("docfx.json");
             if (dir is null)
             {
                 return (TokenizationStatus.Error, null);
@@ -58,29 +58,6 @@ namespace DocFX.Repository.Sweeper.Core
             }
 
             return (TokenizationStatus.Success, map);
-        }
-
-        static DirectoryInfo FindDocFxRootDirectory(DirectoryInfo sourceDirectory)
-        {
-            try
-            {
-                while (sourceDirectory.GetFiles("docfx.json", SearchOption.TopDirectoryOnly).Length == 0)
-                {
-                    sourceDirectory = sourceDirectory.Parent;
-                    if (sourceDirectory == sourceDirectory?.Root)
-                    {
-                        Console.WriteLine("Could not find a directory containing docfx.json.");
-                        return null;
-                    }
-                }
-            }
-            catch (DirectoryNotFoundException)
-            {
-                Console.WriteLine($"Could not find directory {sourceDirectory.FullName}");
-                return null;
-            }
-
-            return sourceDirectory;
         }
 
         static string ToRelativePath(string filePath, int directoryLength)
