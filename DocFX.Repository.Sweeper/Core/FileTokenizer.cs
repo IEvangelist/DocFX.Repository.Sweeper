@@ -1,8 +1,10 @@
 ﻿using DocFX.Repository.Sweeper.Extensions;
+using ShellProgressBar;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace DocFX.Repository.Sweeper.Core
@@ -11,6 +13,7 @@ namespace DocFX.Repository.Sweeper.Core
     {
         public async Task<(TokenizationStatus, IDictionary<FileType, IList<FileToken>>)> TokenizeAsync(Options options)
         {
+            var directoryLength = options.SourceDirectory.Length;
             var dir = FindDocFxRootDirectory(new DirectoryInfo(options.SourceDirectory));
             if (dir is null)
             {
@@ -19,23 +22,29 @@ namespace DocFX.Repository.Sweeper.Core
 
             var map = new ConcurrentDictionary<FileType, IList<FileToken>>();
 
-            await dir.EnumerateFiles("*.*", SearchOption.AllDirectories)
-                     .ForEachAsync(
-                         Environment.ProcessorCount,
-                         async file =>
-                         {
-                             var fileToken = new FileToken(file);
-                             await fileToken.InitializeAsync();
+            var files = dir.EnumerateFiles("*.*", SearchOption.AllDirectories);
+            var count = files.Count();
 
-                             if (map.TryGetValue(fileToken.FileType, out var tokens))
-                             {
-                                 tokens.Add(fileToken);
-                             }
-                             else
-                             {
-                                 map[fileToken.FileType] = new List<FileToken> { fileToken };
-                             }
-                         });
+            using (var progressBar = new ProgressBar(count, "Tokenizing files..."))
+            {
+                await files.ForEachAsync(
+                    Environment.ProcessorCount,
+                    async file =>
+                    {
+                        var fileToken = new FileToken(file);
+                        await fileToken.InitializeAsync();
+
+                        progressBar.Tick($"Tokenizing files...{ToRelativePath(fileToken.FilePath, directoryLength)}");
+                        if (map.TryGetValue(fileToken.FileType, out var tokens))
+                        {
+                            tokens.Add(fileToken);
+                        }
+                        else
+                        {
+                            map[fileToken.FileType] = new List<FileToken> { fileToken };
+                        }
+                    });
+            }
 
             return (TokenizationStatus.Success, map);
         }
@@ -61,6 +70,22 @@ namespace DocFX.Repository.Sweeper.Core
             }
 
             return sourceDirectory;
+        }
+
+        static string ToRelativePath(string filePath, int directoryLength)
+        {
+            try
+            {
+                var fileLength = filePath.Length;
+                return fileLength > directoryLength
+                    ? filePath.Substring(directoryLength, filePath.Length - directoryLength)
+                    : filePath;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return filePath;
+            }
         }
     }
 }

@@ -2,7 +2,7 @@
   "profiles": {
     "DocFX.Repository.Sweeper": {
       "commandName": "Project",
-      "commandLineArgs": "-s \"C:\\Repos\\azure-docs-pr\\articles\\cognitive-services\\LUIS\""
+      "commandLineArgs": "-s \"C:\\Repos\\azure-docs-pr\\articles\""
     }
   }
 }

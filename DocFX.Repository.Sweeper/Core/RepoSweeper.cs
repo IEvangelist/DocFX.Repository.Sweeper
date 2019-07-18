@@ -1,4 +1,5 @@
 ﻿using DocFX.Repository.Sweeper.Extensions;
+using ShellProgressBar;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -42,20 +43,27 @@ namespace DocFX.Repository.Sweeper.Core
                 typeStopwatch.Restart();
                 WriteLine($"\nProcessing {key} files", ConsoleColor.Cyan);
 
-                Parallel.ForEach(
+                var tokens =
                     allTokens.OrderBy(token => token.FilePath)
                              .Where(token =>
                                     token.IsRelevant &&
-                                    !IsTokenReferencedAnywhere(token, allTokensInMap)),
+                                    !IsTokenReferencedAnywhere(token, allTokensInMap));
+                var count = tokens.Count();
+                var progressBar = new ProgressBar(count, $"{key}...");
+
+                Parallel.ForEach(
+                    tokens,
                     token =>
                     {
+                        var relative = directory.MakeRelativeUri(new Uri(token.FilePath));
+                        progressBar.Tick($"{key}...{relative}");
+
                         switch (token.FileType)
                         {
                             case FileType.Markdown:
                                 if (options.FindOrphanedTopics &&
                                     IsTokenWithinScopedDirectory(token, options.SourceDirectory, directoryStringLength))
                                 {
-                                    WriteNonReferencedFileToOutput(token, directory);
                                     orphanedTopics.Add(token.FilePath);
                                     token.IsMarkedForDeletion = options.Delete;
                                 }
@@ -65,7 +73,6 @@ namespace DocFX.Repository.Sweeper.Core
                                 if (options.FindOrphanedImages &&
                                     IsTokenWithinScopedDirectory(token, options.SourceDirectory, directoryStringLength))
                                 {
-                                    WriteNonReferencedFileToOutput(token, directory);
                                     orphanedImages.Add(token.FilePath);
                                     token.IsMarkedForDeletion = options.Delete;
                                 }
@@ -73,6 +80,7 @@ namespace DocFX.Repository.Sweeper.Core
                         }
                     });
 
+                progressBar.Dispose();
                 typeStopwatch.Stop();
                 WriteLine($"Processed {key} files in {typeStopwatch.Elapsed.ToHumanReadableString()}", ConsoleColor.Cyan);
             }
