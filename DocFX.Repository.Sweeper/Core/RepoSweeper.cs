@@ -1,4 +1,5 @@
 ﻿using DocFX.Repository.Sweeper.Extensions;
+using Kurukuru;
 using ShellProgressBar;
 using System;
 using System.Collections.Generic;
@@ -20,87 +21,95 @@ namespace DocFX.Repository.Sweeper.Core
 
             var directoryStringLength = options.SourceDirectory.Length;
             var directory = new Uri(options.SourceDirectory);
-            WriteLine($"Searching \"{options.SourceDirectory}\" for orphaned files.", ConsoleColor.DarkCyan);
+
+            Console.WriteLine();
+            ConsoleColor.Green.WriteLine($"Searching \"{options.SourceDirectory}\" for orphaned files.");
 
             var (status, tokenMap) = await _fileTokenizer.TokenizeAsync(options);
             if (status == TokenizationStatus.Error)
             {
-                WriteLine($"Unexpected error... early exit.", ConsoleColor.DarkRed);
+                status.WriteLine($"Unexpected error... early exit.");
                 return;
             }
 
-            var allTokensInMap = tokenMap.SelectMany(kvp => kvp.Value).Where(t => t.TotalReferences > 0);
-            WriteLine($"Spent {stopwatch.Elapsed.ToHumanReadableString()} tokenizing files.", ConsoleColor.Red);
+            var allTokensInMap = tokenMap.SelectMany(kvp => kvp.Value).Where(t => t.TotalReferences > 0);            
+            Console.WriteLine($"Spent {stopwatch.Elapsed.ToHumanReadableString()} tokenizing files.");            
 
             var typeStopwatch = new Stopwatch();
-            foreach (var key in
+            foreach (var type in
                 tokenMap.Keys
                         .Where(IsRelevantToken)
                         .OrderBy(type => type))
             {
-                var allTokens = tokenMap[key];
+                var allTokens = tokenMap[type];
 
                 typeStopwatch.Restart();
-                WriteLine($"\nProcessing {key} files", ConsoleColor.Cyan);
+                type.WriteLine($"\nProcessing {type} files");
 
-                var tokens =
-                    allTokens.OrderBy(token => token.FilePath)
-                             .Where(token =>
-                                    token.IsRelevant &&
-                                    !IsTokenReferencedAnywhere(token, allTokensInMap));
-                var count = tokens.Count();
-                var progressBar = new ProgressBar(count, $"{key}...");
+                var tokens = allTokens.OrderBy(token => token.FilePath).Where(token => token.IsRelevant);
+                var count = 0;
+                Spinner.Start($"Counting {type} files...", spinner =>
+                {
+                    spinner.Color = ConsoleColor.Blue;
+                    count = tokens.Count();
+                    spinner.Succeed();
+                }, Patterns.Arc);
 
-                Parallel.ForEach(
-                    tokens,
-                    token =>
-                    {
-                        var relative = directory.MakeRelativeUri(new Uri(token.FilePath));
-                        progressBar.Tick($"{key}...{relative}");
-
-                        switch (token.FileType)
+                using (var progressBar =
+                    new ProgressBar(
+                        count,
+                        $"{type} files...",
+                        new ProgressBarOptions
                         {
-                            case FileType.Markdown:
-                                if (options.FindOrphanedTopics &&
-                                    IsTokenWithinScopedDirectory(token, options.SourceDirectory, directoryStringLength))
-                                {
-                                    orphanedTopics.Add(token.FilePath);
-                                    token.IsMarkedForDeletion = options.Delete;
-                                }
-                                break;
+                            ForegroundColor = FileTypeUtils.Utilities[type].Color
+                        }))
+                {
+                    Parallel.ForEach(
+                        tokens,
+                        token =>
+                        {
+                            var relative = directory.MakeRelativeUri(new Uri(token.FilePath));
+                            progressBar.Tick($"{type} files...{relative}");
 
-                            case FileType.Image:
-                                if (options.FindOrphanedImages &&
-                                    IsTokenWithinScopedDirectory(token, options.SourceDirectory, directoryStringLength))
-                                {
-                                    orphanedImages.Add(token.FilePath);
-                                    token.IsMarkedForDeletion = options.Delete;
-                                }
-                                break;
-                        }
-                    });
+                            if (IsTokenReferencedAnywhere(token, allTokensInMap))
+                            {
+                                return;
+                            }
 
-                progressBar.Dispose();
-                typeStopwatch.Stop();
-                WriteLine($"Processed {key} files in {typeStopwatch.Elapsed.ToHumanReadableString()}", ConsoleColor.Cyan);
+                            switch (token.FileType)
+                            {
+                                case FileType.Markdown:
+                                    if (options.FindOrphanedTopics &&
+                                        IsTokenWithinScopedDirectory(token, options.SourceDirectory, directoryStringLength))
+                                    {
+                                        orphanedTopics.Add(token.FilePath);
+                                        token.IsMarkedForDeletion = options.Delete;
+                                    }
+                                    break;
+
+                                case FileType.Image:
+                                    if (options.FindOrphanedImages &&
+                                        IsTokenWithinScopedDirectory(token, options.SourceDirectory, directoryStringLength))
+                                    {
+                                        orphanedImages.Add(token.FilePath);
+                                        token.IsMarkedForDeletion = options.Delete;
+                                    }
+                                    break;
+                            }
+                        });
+
+                    typeStopwatch.Stop();
+                    progressBar.Tick($"Processed {type} files in {typeStopwatch.Elapsed.ToHumanReadableString()}.");
+                }
             }
 
             if (options.FindOrphanedImages)
             {
-                HandleFoundFiles(orphanedImages, FileType.Image, options.Delete, ConsoleColor.Cyan);
+                HandleFoundFiles(orphanedImages, FileType.Image, options.Delete);
             }
             if (options.FindOrphanedTopics)
             {
-                HandleFoundFiles(orphanedTopics, FileType.Markdown, options.Delete, ConsoleColor.Yellow);
-            }
-        }
-
-        private static void WriteNonReferencedFileToOutput(FileToken token, Uri directory)
-        {
-            if (token.FileType != FileType.Yaml)
-            {
-                var relative = directory.MakeRelativeUri(new Uri(token.FilePath)).ToString();
-                Console.WriteLine($"The \"{relative}\" file is not referenced anywhere.");
+                HandleFoundFiles(orphanedTopics, FileType.Markdown, options.Delete);
             }
         }
 
@@ -125,36 +134,31 @@ namespace DocFX.Repository.Sweeper.Core
         static bool IsRelevantToken(FileType fileType)
             => fileType != FileType.NotRelevant && fileType != FileType.Json;
 
-        static void HandleFoundFiles(ISet<string> files, FileType type, bool delete, ConsoleColor color)
+        static void HandleFoundFiles(ISet<string> files, FileType type, bool delete)
         {
             if (files.Any())
             {
-                Console.WriteLine();
-                WriteLine($"Found {files.Count:#,#} orphaned {type} files.", color);
+                type.WriteLine($"Found {files.Count:#,#} orphaned {type} files.");
 
-                foreach (var (ext, count) in files.GroupBy(Path.GetExtension).Select(grp => (grp.Key, grp.Count())))
+                foreach (var (ext, count) in 
+                    files.Select(file => Path.GetExtension(file).ToLower())
+                         .GroupBy(ext => ext)
+                         .Select(grp => (grp.Key, grp.Count())))
                 {
-                    WriteLine($"\t[found {ext} {count:#,#} files]", color);
+                    type.WriteLine($"    [found {ext} {count:#,#} files]");
                 }
 
                 if (delete)
                 {
                     foreach (var file in files.Where(File.Exists))
                     {
-                        WriteLine($"Deleting: {file}.", ConsoleColor.Magenta);
+                        // type.WriteLine($"Deleting: {file}.");
                         File.Delete(file);
                     }
+
+                    type.WriteLine($"Deleted {files.Count():#,#} {type} files.");
                 }
             }
-        }
-
-        static void WriteLine(string message, ConsoleColor color)
-        {
-            var original = Console.ForegroundColor;
-
-            Console.ForegroundColor = color;
-            Console.WriteLine(message);
-            Console.ForegroundColor = original;
         }
     }
 }

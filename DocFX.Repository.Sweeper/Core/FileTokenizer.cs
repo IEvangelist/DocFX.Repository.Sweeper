@@ -1,4 +1,5 @@
 ﻿using DocFX.Repository.Sweeper.Extensions;
+using Kurukuru;
 using ShellProgressBar;
 using System;
 using System.Collections.Concurrent;
@@ -20,14 +21,23 @@ namespace DocFX.Repository.Sweeper.Core
                 return (TokenizationStatus.Error, null);
             }
 
+            var count = 0;
+            Spinner.Start("Gathering files...", spinner =>
+            {
+                spinner.Color = ConsoleColor.Blue;
+                count = 
+                    dir.EnumerateDirectories()
+                       .AsParallel()
+                       .SelectMany(d => d.EnumerateFiles("*.*", SearchOption.AllDirectories))
+                       .Count();
+                spinner.Succeed();
+            }, Patterns.Arc);
             var map = new ConcurrentDictionary<FileType, IList<FileToken>>();
-
-            var files = dir.EnumerateFiles("*.*", SearchOption.AllDirectories);
-            var count = files.Count();
 
             using (var progressBar = new ProgressBar(count, "Tokenizing files..."))
             {
-                await files.ForEachAsync(
+                await dir.EnumerateFiles("*.*", SearchOption.AllDirectories)
+                         .ForEachAsync(
                     Environment.ProcessorCount,
                     async file =>
                     {
@@ -44,6 +54,7 @@ namespace DocFX.Repository.Sweeper.Core
                             map[fileToken.FileType] = new List<FileToken> { fileToken };
                         }
                     });
+                progressBar.Tick("Finished tokenizing files...");
             }
 
             return (TokenizationStatus.Success, map);

@@ -11,15 +11,6 @@ namespace DocFX.Repository.Sweeper.Core
     public class FileToken
     {
         static readonly RegexOptions Options = RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase;
-
-        static readonly Regex MarkdownLinkRegex = new Regex(@"[^!]\[.+?\]\((.+?)\)", Options);
-        static readonly Regex MarkdownImageLinkRegex = new Regex(@"\!\[(.*?)\][\[\(](.*?)[\ \]\)]", Options);
-        static readonly Regex MarkdownLightboxImageLinkRegex = new Regex(@"\[\!\[(.*?)\][\[\(](.*?)[\ \]\)]\]\((.*?)\)", Options);
-        static readonly Regex MarkdownIncludeLinkRegex = new Regex(@"\[\!(.*?)\][\[\(](.*?)[\ \]\)]", Options);
-        static readonly Regex MarkdownReferenceLinkRegex = new Regex(@"\[.*\]:(.*)", Options);
-        static readonly Regex LinkAttributeRegex = new Regex("(?<=src=\"|href=\")(.*?)(?=\")", Options);
-        static readonly Regex YamlLinkRegex = new Regex(@"href:.+?(?'link'.*)", Options);
-        static readonly Regex YamlSrcLinkRegex = new Regex(@"src:.+?(?'link'.*)", Options);
         static readonly Regex FileExtensionRegex = new Regex("(\\.\\w+$)", Options);
 
         readonly FileInfo _fileInfo;
@@ -98,7 +89,7 @@ namespace DocFX.Repository.Sweeper.Core
             var type = FileType;
 
             foreach (var link in
-                lines.SelectMany(line => FindAllLinksInLine(line, MapExpressions(type)))
+                lines.SelectMany(line => FindAllLinksInLine(line, FileTypeUtils.MapExpressions(type)))
                      .Where(link => !string.IsNullOrEmpty(link)))
             {
                 var path = Path.Combine(dir, link);
@@ -115,30 +106,6 @@ namespace DocFX.Repository.Sweeper.Core
                             break;
                     }
                 }
-            }
-        }
-
-        static IEnumerable<Regex> MapExpressions(FileType fileType)
-        {
-            switch (fileType)
-            {
-                case FileType.Markdown:
-                    yield return MarkdownLinkRegex;
-                    yield return MarkdownLightboxImageLinkRegex;
-                    yield return MarkdownImageLinkRegex;
-                    yield return MarkdownIncludeLinkRegex;
-                    yield return MarkdownReferenceLinkRegex;
-                    yield return LinkAttributeRegex;
-                    break;
-
-                case FileType.Yaml:
-                    yield return YamlLinkRegex;
-                    yield return YamlSrcLinkRegex;
-                    yield return LinkAttributeRegex;
-                    break;
-
-                default:
-                    yield break;
             }
         }
 
