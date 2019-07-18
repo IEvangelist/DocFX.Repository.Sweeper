@@ -18,13 +18,14 @@ namespace DocFX.Repository.Sweeper.Core
         static readonly RegexOptions Options = RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase;
 
         static readonly Regex MarkdownLinkRegex = new Regex(@"[^!]\[.+?\]\((\s*.+?)\)", Options);
-        static readonly Regex MarkdownImageLinkRegex = new Regex(@"\!\[(.*?)\][\[\(](\s*.*?)[\ \]\)]", Options);
+        static readonly Regex MarkdownImageLinkRegex = new Regex(@"\!\[(.*?)\][\[\(](\s*.*?)[\ \]\)\r\n]", Options);
         static readonly Regex MarkdownLightboxImageLinkRegex = new Regex(@"\[\!\[(.*?)\][\[\(](\s*.*?)[\ \]\)]\]\((.*?)\)", Options);
-        static readonly Regex MarkdownIncludeLinkRegex = new Regex(@"\[\!(.*?)\][\[\(](\s*.*?)[\ \]\)]", Options);
+        static readonly Regex MarkdownIncludeLinkRegex = new Regex(@"\[\!(.*?)\][\[\(](\s*.*?)[\ \]\)\r\n]", Options);
         static readonly Regex MarkdownReferenceLinkRegex = new Regex(@"\[.*\]:(\s*.*)", Options);
         static readonly Regex MarkdownReferenceLinkWithTitleRegex = new Regex(@"\[.*\]:(?'link'.+?(?=""))", Options);
-        static readonly Regex MarkdownCatchAllLinkRegex = new Regex(@"(.*?)\][\[\(](\s*.*?)[\ \]\)]", Options);
-        static readonly Regex LinkAttributeRegex = new Regex("(?<=src=\"|href=\")(.*?)(?=\")", Options);
+        static readonly Regex MarkdownCatchAllLinkRegex = new Regex(@"(.*?)\][\[\(](\s*.*?)[\ \]\)\r\n]", Options);
+        static readonly Regex MarkdownNestedParathesesRegex = new Regex(@"\](?:[^()]|(?<open>[(])|(?<content-open>[)]))*(?(open)(?!))", Options);
+        static readonly Regex LinkAttributeRegex = new Regex("(?<=src=\\s\"|href=\\s\")(.*?)(?=\")", Options);
         static readonly Regex YamlLinkRegex = new Regex(@"href:.+?(?'link'.*)", Options);
         static readonly Regex YamlSrcLinkRegex = new Regex(@"src:.+?(?'link'.*)", Options);
 
@@ -39,6 +40,7 @@ namespace DocFX.Repository.Sweeper.Core
                     yield return MarkdownIncludeLinkRegex;
                     yield return MarkdownReferenceLinkRegex;
                     yield return MarkdownReferenceLinkWithTitleRegex;
+                    yield return MarkdownNestedParathesesRegex;
                     yield return MarkdownCatchAllLinkRegex;
                     yield return LinkAttributeRegex;
                     break;

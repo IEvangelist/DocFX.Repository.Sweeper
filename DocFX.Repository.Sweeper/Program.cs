@@ -27,9 +27,11 @@ namespace DocFX.Repository.Sweeper
                     var stopwatch = new Stopwatch();
                     stopwatch.Start();
 
-                    await RepoSweeper.SweepAsync(options, stopwatch);
+                    var summary = await RepoSweeper.SweepAsync(options, stopwatch);
 
                     stopwatch.Stop();
+
+                    ConsoleColor.Green.WriteLine(summary.ToString());
                     ConsoleColor.Green.WriteLine($"Elapsed time: {stopwatch.Elapsed.ToHumanReadableString()}");
                 },
                 errors => 

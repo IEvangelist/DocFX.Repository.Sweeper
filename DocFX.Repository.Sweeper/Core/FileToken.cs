@@ -138,7 +138,8 @@ namespace DocFX.Repository.Sweeper.Core
 
             foreach (var value in
                 expressions.SelectMany(ex => ex.Matches(line).Cast<Match>())
-                           .SelectMany(GetMatchingValues))
+                           .SelectMany(GetMatchingValues)
+                           .Select(Uri.UnescapeDataString))
             {
                 yield return CleanMatching(value);
             }
@@ -154,7 +155,11 @@ namespace DocFX.Repository.Sweeper.Core
                 return null;
             }
 
-            if (value.StartsWith("./"))
+            if (value.StartsWith(".//"))
+            {
+                value = value.Substring(3);
+            }
+            else if (value.StartsWith("./"))
             {
                 value = value.Substring(2);
             }

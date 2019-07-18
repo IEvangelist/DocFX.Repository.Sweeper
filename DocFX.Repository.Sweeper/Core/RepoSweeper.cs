@@ -14,7 +14,7 @@ namespace DocFX.Repository.Sweeper.Core
     {
         readonly FileTokenizer _fileTokenizer = new FileTokenizer();
 
-        public async Task SweepAsync(Options options, Stopwatch stopwatch)
+        public async Task<SweepSummary> SweepAsync(Options options, Stopwatch stopwatch)
         {
             var orphanedImages = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var orphanedTopics = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -29,7 +29,7 @@ namespace DocFX.Repository.Sweeper.Core
             if (status == TokenizationStatus.Error)
             {
                 status.WriteLine($"Unexpected error... early exit.");
-                return;
+                return new SweepSummary { Status = status };
             }
 
             var allTokensInMap = tokenMap.SelectMany(kvp => kvp.Value).Where(t => t.TotalReferences > 0);            
@@ -112,6 +112,13 @@ namespace DocFX.Repository.Sweeper.Core
             {
                 HandleFoundFiles(orphanedTopics, FileType.Markdown, options);
             }
+
+            return new SweepSummary
+            {
+                Status = TokenizationStatus.Success,
+                TotalFilesProcessed = tokenMap.SelectMany(kvp => kvp.Value).Count(),
+                TotalCrossReferences = tokenMap.Select(kvp => kvp.Value.Sum(t => t.TotalReferences)).Sum()
+            };
         }
 
         static bool IsTokenWithinScopedDirectory(FileToken token, string sourceDir, int directoryStringLength)
