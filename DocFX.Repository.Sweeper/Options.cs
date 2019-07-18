@@ -13,7 +13,10 @@ namespace DocFX.Repository.Sweeper
         [Option('i', "images", Default = true, HelpText = "If true, finds orphaned image files (.png, .jpg, .jpeg, .gif, .svg).")]
         public bool FindOrphanedImages { get; set; } = true;
 
-        [Option('d', "delete", Required = false, HelpText = "If true, deletes orphaned markdown or image files.")]
+        [Option('d', "delete", Default = false, HelpText = "If true, deletes orphaned markdown or image files.")]
         public bool Delete { get; set; }
+
+        [Option('o', "outputDeleted", Default = false, HelpText = "If true, writes the deleted file paths as output.")]
+        public bool OutputDeletedFiles { get; set; }
     }
 }

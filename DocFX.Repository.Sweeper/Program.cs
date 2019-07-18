@@ -3,6 +3,7 @@ using DocFX.Repository.Sweeper.Core;
 using DocFX.Repository.Sweeper.Extensions;
 using System;
 using System.Diagnostics;
+using System.Text;
 using System.Threading.Tasks;
 using static CommandLine.Parser;
 
@@ -15,6 +16,9 @@ namespace DocFX.Repository.Sweeper
 
         static async Task Main(string[] args)
         {
+            // https://github.com/mayuki/Kurukuru#aware-non-unicode-codepage-on-windows-environment
+            Console.OutputEncoding = Encoding.UTF8;
+
             var parsedArgs = CLI.ParseArguments<Options>(args);
             if (parsedArgs.Tag == ParserResultType.Parsed)
             {
@@ -26,7 +30,7 @@ namespace DocFX.Repository.Sweeper
                     await RepoSweeper.SweepAsync(options, stopwatch);
 
                     stopwatch.Stop();
-                    Console.WriteLine($"Elapsed time: {stopwatch.Elapsed.ToHumanReadableString()}");
+                    ConsoleColor.Green.WriteLine($"Elapsed time: {stopwatch.Elapsed.ToHumanReadableString()}");
                 },
                 errors => 
                 {

@@ -44,9 +44,9 @@ namespace DocFX.Repository.Sweeper.Core
                 var allTokens = tokenMap[type];
 
                 typeStopwatch.Restart();
-                type.WriteLine($"\nProcessing {type} files");
+                type.WriteLine($"Processing {type} files");
 
-                var tokens = allTokens.OrderBy(token => token.FilePath).Where(token => token.IsRelevant);
+                var tokens = allTokens.Where(token => token.IsRelevant);
                 var count = 0;
                 Spinner.Start($"Counting {type} files...", spinner =>
                 {
@@ -65,7 +65,7 @@ namespace DocFX.Repository.Sweeper.Core
                         }))
                 {
                     Parallel.ForEach(
-                        tokens,
+                        tokens.OrderBy(token => token.FilePath),
                         token =>
                         {
                             var relative = directory.MakeRelativeUri(new Uri(token.FilePath));
@@ -99,17 +99,17 @@ namespace DocFX.Repository.Sweeper.Core
                         });
 
                     typeStopwatch.Stop();
-                    progressBar.Tick($"Processed {type} files in {typeStopwatch.Elapsed.ToHumanReadableString()}.");
+                    progressBar.Tick($"- {type} files processed in {typeStopwatch.Elapsed.ToHumanReadableString()}.");
                 }
             }
 
             if (options.FindOrphanedImages)
             {
-                HandleFoundFiles(orphanedImages, FileType.Image, options.Delete);
+                HandleFoundFiles(orphanedImages, FileType.Image, options);
             }
             if (options.FindOrphanedTopics)
             {
-                HandleFoundFiles(orphanedTopics, FileType.Markdown, options.Delete);
+                HandleFoundFiles(orphanedTopics, FileType.Markdown, options);
             }
         }
 
@@ -134,7 +134,7 @@ namespace DocFX.Repository.Sweeper.Core
         static bool IsRelevantToken(FileType fileType)
             => fileType != FileType.NotRelevant && fileType != FileType.Json;
 
-        static void HandleFoundFiles(ISet<string> files, FileType type, bool delete)
+        static void HandleFoundFiles(ISet<string> files, FileType type, Options options)
         {
             if (files.Any())
             {
@@ -148,16 +148,22 @@ namespace DocFX.Repository.Sweeper.Core
                     type.WriteLine($"    [found {ext} {count:#,#} files]");
                 }
 
-                if (delete)
+                if (options.Delete)
                 {
                     foreach (var file in files.Where(File.Exists))
                     {
-                        // type.WriteLine($"Deleting: {file}.");
+                        if (options.OutputDeletedFiles)
+                        {
+                            type.WriteLine($"Deleting: {file}.");
+                        }
+
                         File.Delete(file);
                     }
 
                     type.WriteLine($"Deleted {files.Count():#,#} {type} files.");
                 }
+
+                Console.WriteLine();
             }
         }
     }
