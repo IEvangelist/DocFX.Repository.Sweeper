@@ -202,18 +202,17 @@ namespace DocFX.Repository.Sweeper.Core
                 var sourceDirectory = options.Directory.Parent;
                 var redirectMap = new Dictionary<string, ISet<Redirect>>(StringComparer.OrdinalIgnoreCase);
 
-                DirectoryInfo workingDirectory = null;
-
                 foreach (var (directory, infos) in
                     files.OrderBy(path => path)
                          .Select(file => new FileInfo(file))
                          .GroupBy(info => info.DirectoryName)
                          .Select(grp => (grp.Key, grp)))
                 {
-                    if (workingDirectory is null ||
-                        !string.Equals(workingDirectory.FullName, directory, StringComparison.OrdinalIgnoreCase))
+                    var dir = new DirectoryInfo(directory);
+                    var workingDirectory = dir.TraverseToFile("toc.yml") ?? dir.TraverseToFile("index.yml");
+                    if (workingDirectory is null)
                     {
-                        workingDirectory = new DirectoryInfo(directory).TraverseToFile("toc.yml");
+                        continue;
                     }
 
                     foreach (var info in infos)
