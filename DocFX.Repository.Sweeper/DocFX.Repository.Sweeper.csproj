@@ -17,6 +17,7 @@
     <PackageReference Include="Kurukuru" Version="1.1.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
     <PackageReference Include="ShellProgressBar" Version="4.2.0" />
+    <PackageReference Include="YamlDotNet" Version="6.1.1" />
   </ItemGroup>
 
 </Project>

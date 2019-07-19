@@ -1,3 +1,6 @@
 {
-  "purpose": "unit testing"
+  "build": {
+    "markdownEngineName": "markdig",
+    "dest": "azure"
+  }
 }

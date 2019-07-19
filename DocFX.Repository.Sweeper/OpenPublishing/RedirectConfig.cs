@@ -2,7 +2,7 @@
 
 namespace DocFX.Repository.Sweeper.OpenPublishing
 {
-    public class Redirection
+    public class RedirectConfig
     {
         public List<Redirect> Redirections { get; set; }
     }

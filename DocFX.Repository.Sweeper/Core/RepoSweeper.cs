@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace DocFX.Repository.Sweeper.Core
@@ -21,7 +22,7 @@ namespace DocFX.Repository.Sweeper.Core
             var orphanedTopics = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             var directoryStringLength = options.SourceDirectory.Length;
-            var directory = new Uri(options.SourceDirectory);
+            var directory = options.DirectoryUri;
 
             Console.WriteLine();
             ConsoleColor.Green.WriteLine($"Searching \"{options.SourceDirectory}\" for orphaned files.");
@@ -49,14 +50,14 @@ namespace DocFX.Repository.Sweeper.Core
 
                 var tokens = allTokens.Where(token => token.IsRelevant);
                 var count = 0;
-                Spinner.Start($"Counting {type} files...", spinner =>
+                Spinner.Start($"Scoping \"{type}\" file workload.", spinner =>
                 {
                     spinner.Color = ConsoleColor.Blue;
                     count = tokens.Count();
                     spinner.Succeed();
                 }, Patterns.Arc);
 
-                type.WriteLine($"Processing {type} files");
+                type.WriteLine($"Processing \"{type}\" files.");
 
                 using (var progressBar =
                     new ProgressBar(
@@ -102,7 +103,7 @@ namespace DocFX.Repository.Sweeper.Core
                         });
 
                     typeStopwatch.Stop();
-                    progressBar.Tick($"- {type} files processed in {typeStopwatch.Elapsed.ToHumanReadableString()}.");
+                    progressBar.Tick($"- {count:#,#} \"{type}\" files processed in {typeStopwatch.Elapsed.ToHumanReadableString()}.");
                 }
             }
 
@@ -152,19 +153,18 @@ namespace DocFX.Repository.Sweeper.Core
                 type.WriteLine($"Found {files.Count:#,#} orphaned {type} files.");
 
                 foreach (var (ext, count) in
-                    files.Select(file => Path.GetExtension(file).ToLower())
+                    files.Select(file => Path.GetExtension(file).ToUpper())
                          .GroupBy(ext => ext)
                          .Select(grp => (grp.Key, grp.Count())))
                 {
-                    type.WriteLine($"    [found {ext} {count:#,#} files]");
+                    type.WriteLine($"    {count:#,#} ({ext}) files");
                 }
 
                 if (options.Delete)
                 {
-                    if (type == FileType.Markdown)
+                    if (type == FileType.Markdown && options.ApplyRedirects)
                     {
-                        await Task.CompletedTask;
-                        // await HandleRedirectionAsync(files, options);
+                        await ApplyRedirectsAsync(files, options);
                     }
 
                     foreach (var file in files.Where(File.Exists))
@@ -184,42 +184,116 @@ namespace DocFX.Repository.Sweeper.Core
             }
         }
 
-        static async Task HandleRedirectionAsync(ISet<string> files, Options options)
+        static async Task ApplyRedirectsAsync(ISet<string> files, Options options)
         {
-            var redirection = 
-                await FindFileAsync<Redirection>(
+            var redirectConfig =
+                await FindJsonFileAsync<RedirectConfig>(
                     ".openpublishing.redirection.json",
                     options.SourceDirectory);
 
-            if (redirection?.Redirections.Any() ?? false)
+            if (redirectConfig?.Redirections.Any() ?? false)
             {
+                var docfx =
+                    await FindJsonFileAsync<DocFxConfig>(
+                        "docfx.json",
+                        options.SourceDirectory);
 
-                // foreach file order by path
-                // get directory
-                // from dir find TOC.yml, if there is not an INDEX.yml file... then find the top-level .md
-                // If the INDEX contains "documentType: LandingData" then we're done
+                var dest = docfx?.Build?.Dest;
+                var sourceDirectory = options.Directory.Parent;
+                var redirectMap = new Dictionary<string, ISet<Redirect>>(StringComparer.OrdinalIgnoreCase);
 
-                // EXAMPLE:
-                // 
-                // { 
-                //     "source_path": "articles/cognitive-services/Computer-vision/QuickStarts/curl-disk.md",
-                //     "redirect_url": "/azure/cognitive-services/computer-vision",
-                //     "redirect_document_id": false
-                // }
+                DirectoryInfo workingDirectory = null;
+
+                foreach (var (directory, infos) in
+                    files.OrderBy(path => path)
+                         .Select(file => new FileInfo(file))
+                         .GroupBy(info => info.DirectoryName)
+                         .Select(grp => (grp.Key, grp)))
+                {
+                    if (workingDirectory is null ||
+                        !string.Equals(workingDirectory.FullName, directory, StringComparison.OrdinalIgnoreCase))
+                    {
+                        workingDirectory = new DirectoryInfo(directory).TraverseToFile("toc.yml");
+                    }
+
+                    foreach (var info in infos)
+                    {
+                        var sourcePath = Path.GetRelativePath(sourceDirectory.FullName, info.FullName).Replace(@"\", "/");
+                        var redirectUri = ToRedirectUrl(sourcePath, dest, Path.GetFileName(workingDirectory.FullName));
+                        var redirect = new Redirect
+                        {
+                            SourcePath = sourcePath,
+                            RedirectUrl = redirectUri
+                        };
+
+                        if (redirectMap.TryGetValue(workingDirectory.FullName, out var redirects))
+                        {
+                            redirects.Add(redirect);
+                        }
+                        else
+                        {
+                            redirectMap[workingDirectory.FullName] = new HashSet<Redirect> { redirect };
+                        }
+                    }
+                }
+
+                await SaveRedirectAsync(options, redirectConfig, redirectMap);
             }
         }
 
-        private static async Task<T> FindFileAsync<T>(string filename, string directory)
+        static async Task SaveRedirectAsync(Options options, RedirectConfig redirectConfig, Dictionary<string, ISet<Redirect>> redirectMap)
+        {
+            try
+            {
+                redirectConfig.Redirections.AddRange(
+                    redirectMap.SelectMany(kvp => kvp.Value));
+
+                var dir = options.Directory.TraverseToFile("docfx.json");
+                var json = redirectConfig.ToJson();
+                var path = Path.Combine(dir.FullName, "docfx.json");
+
+                await File.WriteAllTextAsync(path, json);
+            }
+            catch (Exception ex)
+            {
+                ConsoleColor.DarkMagenta.WriteLine($"Unable to apply redirects. {ex.Message}");
+            }
+        }
+
+        static Task<T> FindJsonFileAsync<T>(string filename, string directory)
+            => FindFileAsync(filename, directory, json => json.FromJson<T>());
+
+        static Task<T> FindYamlFileAsync<T>(string filename, string directory)
+            => FindFileAsync(filename, directory, yaml => yaml.FromYaml<T>());
+
+        static async Task<T> FindFileAsync<T>(string filename, string directory, Func<string, T> parse)
         {
             var dir = new DirectoryInfo(directory).TraverseToFile(filename);
             var filepath = Path.Combine(dir.FullName, filename);
             if (File.Exists(filepath))
             {
                 var json = await File.ReadAllTextAsync(filepath);
-                return json.FromJson<T>();
+                return parse(json);
             }
 
             return default;
+        }
+
+        static string ToRedirectUrl(string sourcePath, string dest, string index)
+        {
+            var segments = sourcePath.Split("/").Skip(1).Select(s => s.ToLower());
+            var builder = new StringBuilder($"/{dest}");
+
+            foreach (var segment in segments)
+            {
+                builder.Append($"/{segment}");
+                if (string.Equals(segment, index, StringComparison.OrdinalIgnoreCase))
+                {
+                    break;
+                }
+            }
+
+            return builder.ToString();
         }
     }
 }

@@ -1,9 +1,24 @@
 ﻿using CommandLine;
+using System;
+using System.IO;
 
 namespace DocFX.Repository.Sweeper
 {
     public class Options
     {
+        readonly Lazy<DirectoryInfo> _sourceDirectory;
+        readonly Lazy<Uri> _directoryUri;
+
+        public Options()
+        {
+            _sourceDirectory = new Lazy<DirectoryInfo>(() => new DirectoryInfo(SourceDirectory));
+            _directoryUri = new Lazy<Uri>(() => new Uri(SourceDirectory));
+        }
+
+        public DirectoryInfo Directory => _sourceDirectory.Value;
+
+        public Uri DirectoryUri => _directoryUri.Value;
+
         [Option('s', "directory", Required = true, HelpText = "The source directory to act on (can be subdirectory or top-level).")]
         public string SourceDirectory { get; set; }
 
@@ -18,5 +33,8 @@ namespace DocFX.Repository.Sweeper
 
         [Option('o', "outputDeleted", Default = false, HelpText = "If true, writes the deleted file paths as output.")]
         public bool OutputDeletedFiles { get; set; }
+
+        [Option('r', "redirects", Default = false, HelpText = "If true, writes redirections of deleted files to .openpublishing.redirection.json.")]
+        public bool ApplyRedirects { get; set; }
     }
 }
