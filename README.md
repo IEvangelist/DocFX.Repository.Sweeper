@@ -67,5 +67,5 @@ Here is an example output:
 
 ## The future
 
-  - [] Automatically update the `.openpublishing.redirection.json` when orphaned topics are deleted.
-  - [] Identity and correct, inproper usage of code fence slugs.
+  - [x] Automatically update the `.openpublishing.redirection.json` when orphaned topics are deleted.
+  - [ ] Identity and correct, inproper usage of code fence slugs.
