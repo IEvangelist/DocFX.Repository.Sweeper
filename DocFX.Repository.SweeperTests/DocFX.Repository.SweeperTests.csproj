@@ -7,6 +7,8 @@
 
   <ItemGroup>
     <None Remove="docs-repo\docfx.json" />
+    <None Remove="docs-repo\ref-seven.md" />
+    <None Remove="docs-repo\tbl-image.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -21,6 +23,9 @@
 
   <ItemGroup>
     <Content Include="docs-repo\docfx.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="docs-repo\media\tbl-image.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="docs-repo\image-four.png">
@@ -39,6 +44,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="docs-repo\media\spaces.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="docs-repo\ref-seven.md">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="docs-repo\subdir\ref-six.md">

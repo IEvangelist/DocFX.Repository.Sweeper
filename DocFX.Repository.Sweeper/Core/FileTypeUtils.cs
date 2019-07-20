@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace DocFX.Repository.Sweeper.Core
 {
-    class FileTypeUtils
+    public class FileTypeUtils
     {
         internal static readonly IDictionary<FileType, FileTypeUtils> Utilities = new Dictionary<FileType, FileTypeUtils>
         {
@@ -25,11 +25,12 @@ namespace DocFX.Repository.Sweeper.Core
         static readonly Regex MarkdownReferenceLinkWithTitleRegex = new Regex(@"\[.*\]:(?'link'.+?(?=""))", Options);
         static readonly Regex MarkdownCatchAllLinkRegex = new Regex(@"(.*?)\][\[\(](\s*.*?)[\ \]\)\r\n]", Options);
         static readonly Regex MarkdownNestedParathesesRegex = new Regex(@"\](?:[^()]|(?<open>[(])|(?<content-open>[)]))*(?(open)(?!))", Options);
-        static readonly Regex LinkAttributeRegex = new Regex("(?<=src=\\s\"|href=\\s\")(.*?)(?=\")", Options);
+        static readonly Regex SrcLinkAttributeRegex = new Regex("src\\s*=\\s*\"(?'link'.+?)\"", Options);
+        static readonly Regex HrefLinkAttributeRegex = new Regex("href\\s*=\\s*\"(?'link'.+?)\"", Options);
         static readonly Regex YamlLinkRegex = new Regex(@"href:.+?(?'link'.*)", Options);
         static readonly Regex YamlSrcLinkRegex = new Regex(@"src:.+?(?'link'.*)", Options);
 
-        internal static IEnumerable<Regex> MapExpressions(FileType fileType)
+        public static IEnumerable<Regex> MapExpressions(FileType fileType)
         {
             switch (fileType)
             {
@@ -42,13 +43,15 @@ namespace DocFX.Repository.Sweeper.Core
                     yield return MarkdownReferenceLinkWithTitleRegex;
                     yield return MarkdownNestedParathesesRegex;
                     yield return MarkdownCatchAllLinkRegex;
-                    yield return LinkAttributeRegex;
+                    yield return SrcLinkAttributeRegex;
+                    yield return HrefLinkAttributeRegex;
                     break;
 
                 case FileType.Yaml:
                     yield return YamlLinkRegex;
                     yield return YamlSrcLinkRegex;
-                    yield return LinkAttributeRegex;
+                    yield return SrcLinkAttributeRegex;
+                    yield return HrefLinkAttributeRegex;
                     break;
 
                 default:

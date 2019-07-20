@@ -48,6 +48,15 @@ blah blah...(blah, ...) see the [ref six](./../subdir/ref-six.md?toc=%2fcli%2fmo
 13
 I really like whitespace, ugh! ![seriously]( ./media/serious.png )
 
+<table>
+	<tr>
+		<td valign="top" width="50%">1.<br/><img src="media/tbl-image.png" width="85%" alt-text="Shows Free trial for customer-led trial experience"/><ul><li>User finds your application in AppSource Web Site</li><li>Selects ‘Free trial’ option</li></ul></td>
+		<td valign="top" width="50%">2.<br/><a src="./ref-seven.md" width="85%" alt-text="Shows the Microsoft sign-in page"/><ul><li>User is redirected to Microsoft Sign-in page</li><li>User provides credentials to sign in</li></ul></td>
+	</tr>
+</table>
+
+
+
 [1]: ./image-four.png
 [2]: ref-four.md
 
