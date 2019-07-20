@@ -212,6 +212,8 @@ namespace DocFX.Repository.Sweeper.Core
                     var workingDirectory = dir.TraverseToFile("toc.yml") ?? dir.TraverseToFile("index.yml");
                     if (workingDirectory is null)
                     {
+                        ConsoleColor.Blue.WriteLine($"Unable to find a toc.yml or index.yml in the {directory} directory!");
+
                         continue;
                     }
 
@@ -244,14 +246,16 @@ namespace DocFX.Repository.Sweeper.Core
         {
             try
             {
-                redirectConfig.Redirections.AddRange(
-                    redirectMap.SelectMany(kvp => kvp.Value));
-
-                var dir = options.Directory.TraverseToFile("docfx.json");
+                var startingCount = redirectConfig.Redirections.Count;
+                redirectConfig.Redirections.AddRange(redirectMap.SelectMany(kvp => kvp.Value));
+                var additions = redirectConfig.Redirections.Count - startingCount;
+                var dir = options.Directory.TraverseToFile(".openpublishing.redirection.json");
                 var json = redirectConfig.ToJson();
-                var path = Path.Combine(dir.FullName, "docfx.json");
+                var path = Path.Combine(dir.FullName, ".openpublishing.redirection.json");
 
                 await File.WriteAllTextAsync(path, json);
+
+                ConsoleColor.Green.WriteLine($"Automatically applied {additions:#,#} redirects to the .openpublishing.redirection.json file.");
             }
             catch (Exception ex)
             {

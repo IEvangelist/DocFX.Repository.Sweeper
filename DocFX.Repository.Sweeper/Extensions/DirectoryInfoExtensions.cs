@@ -21,7 +21,6 @@ namespace DocFX.Repository.Sweeper.Extensions
             }
             catch (DirectoryNotFoundException)
             {
-                Console.WriteLine($"Could not find directory {directory.FullName}");
                 return null;
             }
 

@@ -1,4 +1,5 @@
-﻿using YamlDotNet.Serialization;
+﻿using Newtonsoft.Json;
+using YamlDotNet.Serialization;
 using static Newtonsoft.Json.JsonConvert;
 
 namespace DocFX.Repository.Sweeper.Extensions
@@ -9,7 +10,7 @@ namespace DocFX.Repository.Sweeper.Extensions
             => string.IsNullOrWhiteSpace(json) ? default : DeserializeObject<T>(json);
 
         public static string ToJson(this object value) 
-            => value is null ? null : SerializeObject(value);
+            => value is null ? null : SerializeObject(value, Formatting.Indented);
 
         static readonly IDeserializer Deserializer 
             = new DeserializerBuilder() 
