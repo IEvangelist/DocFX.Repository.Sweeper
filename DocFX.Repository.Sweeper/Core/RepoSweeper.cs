@@ -169,7 +169,7 @@ namespace DocFX.Repository.Sweeper.Core
 
                     foreach (var file in files.Where(File.Exists))
                     {
-                        if (options.OutputDeletedFiles)
+                        if (options.OutputWarnings)
                         {
                             type.WriteLine($"Deleting: {file}.");
                         }
@@ -210,7 +210,7 @@ namespace DocFX.Repository.Sweeper.Core
                 {
                     var dir = new DirectoryInfo(directory);
                     var workingDirectory = dir.TraverseToFile("toc.yml") ?? dir.TraverseToFile("index.yml");
-                    if (workingDirectory is null)
+                    if (workingDirectory is null && options.OutputWarnings)
                     {
                         ConsoleColor.Blue.WriteLine($"Unable to find a toc.yml or index.yml in the {directory} directory!");
 
@@ -255,9 +255,9 @@ namespace DocFX.Repository.Sweeper.Core
 
                 await File.WriteAllTextAsync(path, json);
 
-                ConsoleColor.Green.WriteLine($"Automatically applied {additions:#,#} redirects to the .openpublishing.redirection.json file.");
+                ConsoleColor.Green.WriteLine($"Automatically applied {additions:#,#} redirects to the \".openpublishing.redirection.json\" file.");
             }
-            catch (Exception ex)
+            catch (Exception ex) when (options.OutputWarnings)
             {
                 ConsoleColor.DarkMagenta.WriteLine($"Unable to apply redirects. {ex.Message}");
             }

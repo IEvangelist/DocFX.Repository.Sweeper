@@ -31,8 +31,8 @@ namespace DocFX.Repository.Sweeper
         [Option('d', "delete", Default = false, HelpText = "If true, deletes orphaned markdown or image files.")]
         public bool Delete { get; set; }
 
-        [Option('o', "outputDeleted", Default = false, HelpText = "If true, writes the deleted file paths as output.")]
-        public bool OutputDeletedFiles { get; set; }
+        [Option('o', "outputWarnings", Default = false, HelpText = "If true, writes various warnings to the standard output.")]
+        public bool OutputWarnings { get; set; }
 
         [Option('r', "redirects", Default = false, HelpText = "If true, writes redirections of deleted files to .openpublishing.redirection.json.")]
         public bool ApplyRedirects { get; set; }
