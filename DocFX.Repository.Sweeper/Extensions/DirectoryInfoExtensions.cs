@@ -14,7 +14,6 @@ namespace DocFX.Repository.Sweeper.Extensions
                     directory = directory.Parent;
                     if (directory == directory?.Root)
                     {
-                        Console.WriteLine($"Could not find a directory containing {filename}.");
                         return null;
                     }
                 }

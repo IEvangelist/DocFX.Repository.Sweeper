@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,6 +17,10 @@ namespace DocFX.Repository.Sweeper.Core
     public class RepoSweeper
     {
         readonly FileTokenizer _fileTokenizer = new FileTokenizer();
+
+        static readonly IDictionary<string, bool> _validRedirectUrlCache =
+            new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+        static HttpClient _httpClient;
 
         public async Task<SweepSummary> SweepAsync(Options options, Stopwatch stopwatch)
         {
@@ -210,10 +216,13 @@ namespace DocFX.Repository.Sweeper.Core
                 {
                     var dir = new DirectoryInfo(directory);
                     var workingDirectory = dir.TraverseToFile("toc.yml") ?? dir.TraverseToFile("index.yml");
-                    if (workingDirectory is null && options.OutputWarnings)
+                    if (workingDirectory is null)
                     {
-                        ConsoleColor.Blue.WriteLine($"Unable to find a toc.yml or index.yml in the {directory} directory!");
-
+                        if (options.OutputWarnings)
+                        {
+                            ConsoleColor.Blue.WriteLine(
+                                $"Unable to find a toc.yml or index.yml in the {directory} directory!");
+                        }
                         continue;
                     }
 
@@ -226,6 +235,12 @@ namespace DocFX.Repository.Sweeper.Core
                             SourcePath = sourcePath,
                             RedirectUrl = redirectUri
                         };
+
+                        var isValidRedirect = await IsValidRedirectPathAsync(options.HostUrl, redirectUri);
+                        if (!isValidRedirect)
+                        {
+                            continue;
+                        }
 
                         if (redirectMap.TryGetValue(workingDirectory.FullName, out var redirects))
                         {
@@ -242,6 +257,33 @@ namespace DocFX.Repository.Sweeper.Core
             }
         }
 
+        static async Task<bool> IsValidRedirectPathAsync(string hostUrl, string redirectPath)
+        {
+            var redirectUrl = $"{hostUrl}{redirectPath}";
+            if (_validRedirectUrlCache.TryGetValue(redirectUrl, out var isValid) && isValid)
+            {
+                return true;
+            }
+
+            try
+            {
+                _httpClient = _httpClient ?? new HttpClient();
+                var response = await _httpClient.GetAsync(redirectUrl);
+
+                return _validRedirectUrlCache[redirectUrl] =
+                    response.StatusCode != HttpStatusCode.NotFound;
+            }
+            catch (Exception ex)
+            {
+                if (Debugger.IsAttached)
+                {
+                    Debugger.Break();
+                }
+
+                return false;
+            }
+        }
+
         static async Task SaveRedirectAsync(Options options, RedirectConfig redirectConfig, Dictionary<string, ISet<Redirect>> redirectMap)
         {
             try
@@ -255,7 +297,7 @@ namespace DocFX.Repository.Sweeper.Core
 
                 await File.WriteAllTextAsync(path, json);
 
-                ConsoleColor.Green.WriteLine($"Automatically applied {additions:#,#} redirects to the \".openpublishing.redirection.json\" file.");
+                FileType.Markdown.WriteLine($"Automatically applied {additions:#,#} redirects to the \".openpublishing.redirection.json\" file.");
             }
             catch (Exception ex) when (options.OutputWarnings)
             {

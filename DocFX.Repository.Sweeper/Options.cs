@@ -36,5 +36,8 @@ namespace DocFX.Repository.Sweeper
 
         [Option('r', "redirects", Default = false, HelpText = "If true, writes redirections of deleted files to .openpublishing.redirection.json.")]
         public bool ApplyRedirects { get; set; }
+
+        [Option('h', "hosturl", Default = "https://docs.microsoft.com", HelpText = "If 'redirects' is true, this is required and is the host where the docs site is hosted.")]
+        public string HostUrl { get; set; }
     }
 }
