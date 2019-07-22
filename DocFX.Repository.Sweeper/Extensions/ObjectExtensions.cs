@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using YamlDotNet.Serialization;
 using static Newtonsoft.Json.JsonConvert;
 
@@ -6,14 +7,27 @@ namespace DocFX.Repository.Sweeper.Extensions
 {
     public static class ObjectExtensions
     {
-        public static T FromJson<T>(this string json) 
-            => string.IsNullOrWhiteSpace(json) ? default : DeserializeObject<T>(json);
+        static readonly DefaultContractResolver ContractResolver = new DefaultContractResolver
+        {
+            NamingStrategy = new CamelCaseNamingStrategy()
+        };
 
-        public static string ToJson(this object value) 
-            => value is null ? null : SerializeObject(value, Formatting.Indented);
+        static readonly JsonSerializerSettings DefaultSettings = new JsonSerializerSettings
+        {
+            ContractResolver = ContractResolver,
+            Formatting = Formatting.Indented,
+            NullValueHandling = NullValueHandling.Ignore,
+            MissingMemberHandling = MissingMemberHandling.Ignore
+        };
 
-        static readonly IDeserializer Deserializer 
-            = new DeserializerBuilder() 
+        public static T FromJson<T>(this string json, JsonSerializerSettings serializerSettings = null)
+            => string.IsNullOrWhiteSpace(json) ? default : DeserializeObject<T>(json, serializerSettings ?? DefaultSettings);
+
+        public static string ToJson(this object value, JsonSerializerSettings serializerSettings = null)
+            => value is null ? null : SerializeObject(value, serializerSettings ?? DefaultSettings);
+
+        static readonly IDeserializer Deserializer
+            = new DeserializerBuilder()
                 .IgnoreUnmatchedProperties()
                 .Build();
 
