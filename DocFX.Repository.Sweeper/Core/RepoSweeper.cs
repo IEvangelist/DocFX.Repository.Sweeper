@@ -74,6 +74,9 @@ namespace DocFX.Repository.Sweeper.Core
                             var relative = directory.MakeRelativeUri(new Uri(token.FilePath));
                             progressBar.Tick($"{type} files...{relative}");
 
+                            // TODO: ignore file references outside our scope.
+                            // For example, since we're not tokenizing files outside our top-level directory we couldn't possibly 
+                            // validate a reference to a file beyond that scope today.
                             if (IsTokenReferencedAnywhere(token, allTokensInMap))
                             {
                                 return;
@@ -108,12 +111,12 @@ namespace DocFX.Repository.Sweeper.Core
 
             if (options.FindOrphanedTopics)
             {
-                await HandleFoundFilesAsync(orphanedTopics, FileType.Markdown, options);
+                await HandleOrphanedFilesAsync(orphanedTopics, FileType.Markdown, options);
             }
 
             if (options.FindOrphanedImages)
             {
-                await HandleFoundFilesAsync(orphanedImages, FileType.Image, options);
+                await HandleOrphanedFilesAsync(orphanedImages, FileType.Image, options);
             }
 
             return new SweepSummary
@@ -145,7 +148,7 @@ namespace DocFX.Repository.Sweeper.Core
         static bool IsRelevantToken(FileType fileType)
             => fileType != FileType.NotRelevant && fileType != FileType.Json;
 
-        async Task HandleFoundFilesAsync(ISet<string> files, FileType type, Options options)
+        async Task HandleOrphanedFilesAsync(ISet<string> files, FileType type, Options options)
         {
             if (files.Any())
             {

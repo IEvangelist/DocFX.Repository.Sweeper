@@ -154,6 +154,10 @@ namespace DocFX.Repository.Sweeper.Core
             {
                 value = value.Substring(2);
             }
+            else if (value.StartsWith("xref:"))
+            {
+                value = value.Substring(5);
+            }
 
             var cleaned =
                 StripQueryStringOrHeaderLink(value)

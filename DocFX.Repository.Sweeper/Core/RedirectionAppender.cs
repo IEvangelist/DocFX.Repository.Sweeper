@@ -71,7 +71,7 @@ namespace DocFX.Repository.Sweeper.Core
                                 RedirectUrl = redirectUri
                             };
 
-                            var isValidRedirect = await IsValidRedirectPathAsync(options.HostUrl, redirectUri);
+                            var isValidRedirect = await IsValidRedirectPathAsync(options.HostUrl, redirectUri, options.QueryString);
                             if (!isValidRedirect)
                             {
                                 continue;
@@ -94,9 +94,9 @@ namespace DocFX.Repository.Sweeper.Core
             }
         }
 
-        static async Task<bool> IsValidRedirectPathAsync(string hostUrl, string redirectPath)
+        static async Task<bool> IsValidRedirectPathAsync(string hostUrl, string redirectPath, string queryString)
         {
-            var redirectUrl = $"{hostUrl}{redirectPath}";
+            var redirectUrl = $"{hostUrl}{redirectPath}{queryString}";
             if (_validRedirectUrlCache.TryGetValue(redirectUrl, out var isValid) && isValid)
             {
                 return true;

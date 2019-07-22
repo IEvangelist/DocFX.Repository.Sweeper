@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using CommandLine.Text;
 using System;
 using System.IO;
 
@@ -39,5 +40,8 @@ namespace DocFX.Repository.Sweeper
 
         [Option('h', "hosturl", Default = "https://docs.microsoft.com", HelpText = "If 'redirects' is true, this is required and is the host where the docs site is hosted.")]
         public string HostUrl { get; set; }
+
+        [Option('q', "query", HelpText = "If 'redirects' is true, this is an optional query string to be applied to redirect validation.")]
+        public string QueryString { get; set; }
     }
 }
