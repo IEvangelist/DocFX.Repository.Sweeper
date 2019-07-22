@@ -277,6 +277,7 @@ namespace DocFX.Repository.Sweeper.Core
             {
                 if (Debugger.IsAttached)
                 {
+                    Debug.WriteLine(ex.Message);
                     Debugger.Break();
                 }
 
