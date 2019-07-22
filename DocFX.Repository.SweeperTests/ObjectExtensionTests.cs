@@ -1,6 +1,5 @@
 ﻿using DocFX.Repository.Sweeper.Extensions;
 using DocFX.Repository.Sweeper.OpenPublishing;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;

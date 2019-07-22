@@ -17,47 +17,45 @@ namespace DocFX.Repository.Sweeper.Core
 
         static readonly RegexOptions Options = RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase;
 
-        static readonly Regex MarkdownLinkRegex = new Regex(@"[^!]\[.+?\]\((\s*.+?)\)", Options);
-        static readonly Regex MarkdownImageLinkRegex = new Regex(@"\!\[(.*?)\][\[\(](\s*.*?)[\ \]\)\r\n]", Options);
+        static readonly Regex MarkdownLinkRegex = new Regex(@"[^!]\[.+?\]\((?'link'\s*.+?)\)", Options);
+        static readonly Regex MarkdownImageLinkRegex = new Regex(@"\!\[(.*?)\][\[\(](?'link'\s*.*?)[\ \]\)\r\n]", Options);
         static readonly Regex MarkdownLightboxImageLinkRegex = new Regex(@"\[\!\[(.*?)\][\[\(](\s*.*?)[\ \]\)]\]\((.*?)\)", Options);
-        static readonly Regex MarkdownIncludeLinkRegex = new Regex(@"\[\!(.*?)\][\[\(](\s*.*?)[\ \]\)\r\n]", Options);
-        static readonly Regex MarkdownReferenceLinkRegex = new Regex(@"\[.*\]:(\s*.*)", Options);
+        static readonly Regex MarkdownIncludeLinkRegex = new Regex(@"\[\!(.*?)\][\[\(](?'link'\s*.*?)[\ \]\)\r\n]", Options);
+        static readonly Regex MarkdownReferenceLinkRegex = new Regex(@"\[.*\]:(?'link'\s*.*)", Options);
         static readonly Regex MarkdownReferenceLinkWithTitleRegex = new Regex(@"\[.*\]:(?'link'.+?(?=""))", Options);
-        static readonly Regex MarkdownCatchAllLinkRegex = new Regex(@"(.*?)\][\[\(](\s*.*?)[\ \]\)\r\n]", Options);
+        static readonly Regex MarkdownCatchAllLinkRegex = new Regex(@"(.*?)\][\[\(](?'link'\s*.*?)[\ \]\)\r\n]", Options);
         static readonly Regex MarkdownNestedParathesesRegex = new Regex(@"\](?:[^()]|(?<open>[(])|(?<content-open>[)]))*(?(open)(?!))", Options);
         static readonly Regex SrcLinkAttributeRegex = new Regex("src\\s*=\\s*\"(?'link'.+?)\"", Options);
         static readonly Regex HrefLinkAttributeRegex = new Regex("href\\s*=\\s*\"(?'link'.+?)\"", Options);
         static readonly Regex YamlLinkRegex = new Regex(@"href:.+?(?'link'.*)", Options);
         static readonly Regex YamlSrcLinkRegex = new Regex(@"src:.+?(?'link'.*)", Options);
 
-        public static IEnumerable<Regex> MapExpressions(FileType fileType)
-        {
-            switch (fileType)
+        static readonly IDictionary<FileType, IEnumerable<Regex>> Expressions =
+            new Dictionary<FileType, IEnumerable<Regex>>
             {
-                case FileType.Markdown:
-                    yield return MarkdownLinkRegex;
-                    yield return MarkdownLightboxImageLinkRegex;
-                    yield return MarkdownImageLinkRegex;
-                    yield return MarkdownIncludeLinkRegex;
-                    yield return MarkdownReferenceLinkRegex;
-                    yield return MarkdownReferenceLinkWithTitleRegex;
-                    yield return MarkdownNestedParathesesRegex;
-                    yield return MarkdownCatchAllLinkRegex;
-                    yield return SrcLinkAttributeRegex;
-                    yield return HrefLinkAttributeRegex;
-                    break;
+                [FileType.Markdown] = new[]
+                {
+                    MarkdownLinkRegex,
+                    MarkdownImageLinkRegex,
+                    MarkdownLightboxImageLinkRegex,
+                    MarkdownIncludeLinkRegex,
+                    MarkdownReferenceLinkRegex,
+                    MarkdownReferenceLinkWithTitleRegex,
+                    MarkdownNestedParathesesRegex,
+                    MarkdownCatchAllLinkRegex,
+                    SrcLinkAttributeRegex,
+                    HrefLinkAttributeRegex
+                },
+                [FileType.Yaml] = new[]
+                {
+                    YamlLinkRegex,
+                    YamlSrcLinkRegex,
+                    SrcLinkAttributeRegex,
+                    HrefLinkAttributeRegex
+                }
+            };
 
-                case FileType.Yaml:
-                    yield return YamlLinkRegex;
-                    yield return YamlSrcLinkRegex;
-                    yield return SrcLinkAttributeRegex;
-                    yield return HrefLinkAttributeRegex;
-                    break;
-
-                default:
-                    yield break;
-            }
-        }
+        public static IEnumerable<Regex> MapExpressions(FileType fileType) => Expressions[fileType];
 
         internal ConsoleColor Color { get; private set; }
     }

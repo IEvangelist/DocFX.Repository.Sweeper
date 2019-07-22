@@ -15,8 +15,6 @@ namespace DocFX.Repository.Sweeper.Core
 
         readonly FileInfo _fileInfo;
         readonly Lazy<Task<string[]>> _readAllLinesTask;
-        readonly HashSet<string> _imagesReferenced = new HashSet<string>();
-        readonly HashSet<string> _topicsReferenced = new HashSet<string>();
 
         public FileToken(FileInfo file)
         {
@@ -32,8 +30,8 @@ namespace DocFX.Repository.Sweeper.Core
 
         public string FilePath => _fileInfo?.FullName;
         public FileType FileType { get; }
-        public ISet<string> TopicsReferenced => _topicsReferenced;
-        public ISet<string> ImagesReferenced => _imagesReferenced;
+        public ISet<string> TopicsReferenced { get; } = new HashSet<string>();
+        public ISet<string> ImagesReferenced { get; } = new HashSet<string>();
         public int TotalReferences => TopicsReferenced.Count + ImagesReferenced.Count;
         public bool IsRelevant => FileType != FileType.NotRelevant && FileType != FileType.Json;
         public bool IsMarkedForDeletion { get; set; }
@@ -45,7 +43,7 @@ namespace DocFX.Repository.Sweeper.Core
             {
                 case FileType.Markdown:
                 case FileType.Yaml:
-                    return $"{type} File: {_fileInfo.Name}, references {_topicsReferenced.Count} other files and {_imagesReferenced.Count} images.";
+                    return $"{type} File: {_fileInfo.Name}, references {TopicsReferenced.Count} other files and {ImagesReferenced.Count} images.";
 
                 case FileType.Json:
                 case FileType.Image:
@@ -67,17 +65,17 @@ namespace DocFX.Repository.Sweeper.Core
             {
                 case FileType.Markdown:
                 case FileType.Yaml:
-                    return _topicsReferenced.Any(file => string.Equals(file, other.FilePath, StringComparison.OrdinalIgnoreCase));
+                    return TopicsReferenced.Any(file => string.Equals(file, other.FilePath, StringComparison.OrdinalIgnoreCase));
 
                 case FileType.Image:
-                    return _imagesReferenced.Any(image => string.Equals(image, other.FilePath, StringComparison.OrdinalIgnoreCase));
+                    return ImagesReferenced.Any(image => string.Equals(image, other.FilePath, StringComparison.OrdinalIgnoreCase));
 
                 default:
                     return false;
             }
         }
 
-        public async Task InitializeAsync()
+        public async ValueTask InitializeAsync()
         {
             if (_readAllLinesTask is null)
             {
@@ -99,10 +97,10 @@ namespace DocFX.Repository.Sweeper.Core
                     switch (file.GetFileType())
                     {
                         case FileType.Image:
-                            _imagesReferenced.Add(file.FullName);
+                            ImagesReferenced.Add(file.FullName);
                             break;
                         case FileType.Markdown:
-                            _topicsReferenced.Add(file.FullName);
+                            TopicsReferenced.Add(file.FullName);
                             break;
                     }
                 }
@@ -123,17 +121,10 @@ namespace DocFX.Repository.Sweeper.Core
                     yield return match.Groups["link"].Value;
                 }
 
-                if (match.Groups.Count == 3)
+                foreach (Group group in match.Groups)
                 {
-                    yield return match.Groups[1].Value;
-                    yield return match.Groups[2].Value;
+                    yield return group.Value;
                 }
-                else if (match.Groups.Count > 0)
-                {
-                    yield return match.Groups[match.Groups.Count - 1].Value;
-                }
-
-                yield return match.Value;
             }
 
             foreach (var value in
@@ -148,13 +139,13 @@ namespace DocFX.Repository.Sweeper.Core
         string CleanMatching(string value)
         {
             if (string.IsNullOrWhiteSpace(value) ||
-                value.StartsWith("http:", StringComparison.OrdinalIgnoreCase) ||
-                value.StartsWith("https:", StringComparison.OrdinalIgnoreCase) ||
+                value.StartsWith("http", StringComparison.OrdinalIgnoreCase) ||
                 value.StartsWith("#"))
             {
                 return null;
             }
 
+            value = value.Trim();
             if (value.StartsWith(".//"))
             {
                 value = value.Substring(3);
@@ -165,7 +156,7 @@ namespace DocFX.Repository.Sweeper.Core
             }
 
             var cleaned =
-                StripQueryStringOrHeaderLink(value.Trim())
+                StripQueryStringOrHeaderLink(value)
                     .Replace("~", "..")
                     .Replace("/azure/", "/articles/");
 

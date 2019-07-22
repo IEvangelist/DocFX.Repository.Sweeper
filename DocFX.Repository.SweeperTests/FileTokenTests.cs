@@ -1,6 +1,5 @@
 ﻿using DocFX.Repository.Sweeper.Core;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -41,21 +40,6 @@ namespace DocFX.Repository.SweeperTests
             {
                 Assert.True(token.HasReferenceTo(otherToken));
             }
-        }
-
-        [Fact]
-        public void RegexTest()
-        {
-            var test =
-                @"		<td valign=""top"" width=""50 % "">2.<br/><a src=""./ref-seven.md"" width=""85 % "" alt-text=""Shows the Microsoft sign-in page""/><ul><li>User is redirected to Microsoft Sign-in page</li><li>User provides credentials to sign in</li></ul></td>
-";
-
-            Assert.Contains(
-                FileTypeUtils.MapExpressions(FileType.Markdown)
-                             .SelectMany(regex => regex.Matches(test)),
-                match =>
-                match?.Groups.Any(grp => 
-                                  grp.Name == "link" && grp.Value == "./ref-seven.md") ?? false);
         }
     }
 }
