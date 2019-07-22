@@ -74,10 +74,12 @@ namespace DocFX.Repository.Sweeper.Core
                             var relative = directory.MakeRelativeUri(new Uri(token.FilePath));
                             progressBar.Tick($"{type} files...{relative}");
 
-                            // TODO: ignore file references outside our scope.
-                            // For example, since we're not tokenizing files outside our top-level directory we couldn't possibly 
-                            // validate a reference to a file beyond that scope today.
                             if (IsTokenReferencedAnywhere(token, allTokensInMap))
+                            {
+                                return;
+                            }
+
+                            if (!IsTokenWithinScopedDirectory(token, options.SourceDirectory, directoryStringLength))
                             {
                                 return;
                             }
@@ -85,8 +87,7 @@ namespace DocFX.Repository.Sweeper.Core
                             switch (token.FileType)
                             {
                                 case FileType.Markdown:
-                                    if (options.FindOrphanedTopics &&
-                                        IsTokenWithinScopedDirectory(token, options.SourceDirectory, directoryStringLength))
+                                    if (options.FindOrphanedTopics)
                                     {
                                         orphanedTopics.Add(token.FilePath);
                                         token.IsMarkedForDeletion = options.Delete;
@@ -94,8 +95,7 @@ namespace DocFX.Repository.Sweeper.Core
                                     break;
 
                                 case FileType.Image:
-                                    if (options.FindOrphanedImages &&
-                                        IsTokenWithinScopedDirectory(token, options.SourceDirectory, directoryStringLength))
+                                    if (options.FindOrphanedImages)
                                     {
                                         orphanedImages.Add(token.FilePath);
                                         token.IsMarkedForDeletion = options.Delete;
