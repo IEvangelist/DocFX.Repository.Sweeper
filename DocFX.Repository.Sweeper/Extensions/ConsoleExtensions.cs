@@ -8,8 +8,8 @@ namespace DocFX.Repository.Sweeper.Extensions
         internal static void WriteLine(this ConsoleColor color, string message)
             => WriteLine(message, color);
 
-        internal static void WriteLine(this TokenizationStatus status, string message)
-            => WriteLine(message, status == TokenizationStatus.Success ? ConsoleColor.DarkGreen : ConsoleColor.DarkRed);
+        internal static void WriteLine(this Status status, string message)
+            => WriteLine(message, status == Status.Success ? ConsoleColor.DarkGreen : ConsoleColor.DarkRed);
 
         internal static void WriteLine(this FileType fileType, string message)
             => WriteLine(message, FileTypeUtils.Utilities[fileType].Color);

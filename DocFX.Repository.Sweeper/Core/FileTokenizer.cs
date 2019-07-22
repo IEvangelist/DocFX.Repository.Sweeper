@@ -12,13 +12,13 @@ namespace DocFX.Repository.Sweeper.Core
 {
     public class FileTokenizer
     {
-        public async Task<(TokenizationStatus, IDictionary<FileType, IList<FileToken>>)> TokenizeAsync(Options options)
+        public async Task<(Status, IDictionary<FileType, IList<FileToken>>)> TokenizeAsync(Options options)
         {
             var directoryLength = options.SourceDirectory.Length;
             var dir = new DirectoryInfo(options.SourceDirectory).TraverseToFile("docfx.json");
             if (dir is null)
             {
-                return (TokenizationStatus.Error, null);
+                return (Status.Error, null);
             }
 
             var count = 0;
@@ -57,7 +57,7 @@ namespace DocFX.Repository.Sweeper.Core
                 progressBar.Tick("Finished tokenizing files...");
             }
 
-            return (TokenizationStatus.Success, map);
+            return (Status.Success, map);
         }
 
         static string ToRelativePath(string filePath, int directoryLength)

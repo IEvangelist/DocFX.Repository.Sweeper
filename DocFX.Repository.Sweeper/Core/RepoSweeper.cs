@@ -27,7 +27,7 @@ namespace DocFX.Repository.Sweeper.Core
             ConsoleColor.Green.WriteLine($"Searching \"{options.SourceDirectory}\" for orphaned files.");
 
             var (status, tokenMap) = await _fileTokenizer.TokenizeAsync(options);
-            if (status == TokenizationStatus.Error)
+            if (status == Status.Error)
             {
                 status.WriteLine($"Unexpected error... early exit.");
                 return new SweepSummary { Status = status };
@@ -121,7 +121,7 @@ namespace DocFX.Repository.Sweeper.Core
 
             return new SweepSummary
             {
-                Status = TokenizationStatus.Success,
+                Status = Status.Success,
                 TotalFilesProcessed = tokenMap.SelectMany(kvp => kvp.Value).Count(),
                 TotalCrossReferences = tokenMap.Select(kvp => kvp.Value.Sum(t => t.TotalReferences)).Sum()
             };
