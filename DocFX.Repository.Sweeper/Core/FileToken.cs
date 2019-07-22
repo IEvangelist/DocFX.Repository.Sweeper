@@ -128,7 +128,7 @@ namespace DocFX.Repository.Sweeper.Core
             }
 
             foreach (var value in
-                expressions.SelectMany(ex => ex.Matches(line).Cast<Match>())
+                expressions.SelectMany(ex => ex.Matches(line))
                            .SelectMany(GetMatchingValues)
                            .Select(Uri.UnescapeDataString))
             {
