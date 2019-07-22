@@ -209,7 +209,8 @@ namespace DocFX.Repository.Sweeper.Core
                 var redirectMap = new Dictionary<string, ISet<Redirect>>(StringComparer.OrdinalIgnoreCase);
 
                 foreach (var (directory, infos) in
-                    files.OrderBy(path => path)
+                    files.Where(file => !string.IsNullOrWhiteSpace(file))
+                         .OrderBy(path => path)
                          .Select(file => new FileInfo(file))
                          .GroupBy(info => info.DirectoryName)
                          .Select(grp => (grp.Key, grp)))
