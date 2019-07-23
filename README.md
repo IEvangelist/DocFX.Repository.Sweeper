@@ -1,6 +1,7 @@
 # :metal: DocFX.Repository.Sweeper
 
 [![Build Status](https://dev.azure.com/david-pine/Repository%20Sweeper/_apis/build/status/IEvangelist.DocFX.Repository.Sweeper?branchName=master)](https://dev.azure.com/david-pine/Repository%20Sweeper/_build/latest?definitionId=1&branchName=master)
+![License](https://img.shields.io/github/license/ievangelist/DocFX.Repository.Sweeper.svg)
 
 The `DocFX.Repository.Sweeper` (**sweeper**) is a tool for sweeping **DocFX** repositories clean of files that are not being used.
 
