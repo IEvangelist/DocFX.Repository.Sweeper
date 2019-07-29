@@ -1,8 +1,6 @@
 ﻿using DocFX.Repository.Sweeper.Core;
-using System;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -36,6 +34,10 @@ namespace DocFX.Repository.SweeperTests
                 new FileToken(new FileInfo($"{dir}/media/spaces.jpg")),
                 new FileToken(new FileInfo($"{dir}/grandparent/media/csharp logo.png")),
             };
+
+            Assert.NotNull(token.Header);
+            Assert.Equal("dapine", token.Header.Value.MicrosoftAuthor);
+            Assert.Equal("IEvangelist", token.Header.Value.GitHubAuthor);
 
             Assert.Equal(expectedTokens.Where(t => t.FileType == FileType.Image).Count(), token.ImagesReferenced.Count);
             Assert.Equal(expectedTokens.Where(t => t.FileType == FileType.Markdown).Count(), token.TopicsReferenced.Count);

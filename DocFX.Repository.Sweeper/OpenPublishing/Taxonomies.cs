@@ -1,62 +1,67 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace DocFX.Repository.Sweeper.OpenPublishing
 {
     public class Taxonomies
     {
+        public static readonly Regex CodeFenceRegex =
+            new Regex("```\b(?'slug'.+?)\b", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.Singleline);
+
         // https://review.docs.microsoft.com/en-us/new-hope/information-architecture/metadata/taxonomies?branch=master#dev-lang
-        public static IReadOnlyList<Taxonomy> Languages { get; } =
-            new List<Taxonomy>
+        public static IDictionary<string, Taxonomy> Languages { get; } =
+            new Dictionary<string, Taxonomy>(StringComparer.OrdinalIgnoreCase)
             {
-                new Taxonomy("aspx", "ASP.NET"),
-                new Taxonomy("aspx-csharp", "ASP.NET (C#)"),
-                new Taxonomy("aspx-vb", "ASP.NET (VB)"),
-                new Taxonomy("azcopy", "AZCopy"),
-                new Taxonomy("azurecli", "Azure CLI"),
-                new Taxonomy("azurepowershell", "Azure PowerShell"),
-                new Taxonomy("brainscript", "BrainScript"),
-                new Taxonomy("c", "C"),
-                new Taxonomy("cpp", "C++"),
-                new Taxonomy("cppcx", "C++/CX"),
-                new Taxonomy("cppwinrt", "C++/WIN RT"),
-                new Taxonomy("csharp", "C#"),
-                new Taxonomy("cshtml", "CSHTML"),
-                new Taxonomy("dax", "DAX"),
-                new Taxonomy("fsharp", "F#"),
-                new Taxonomy("go", "Go"),
-                new Taxonomy("html", "HTML"),
-                new Taxonomy("http", "HTTP"),
-                new Taxonomy("java", "Java"),
-                new Taxonomy("javascript", "JavaScript"),
-                new Taxonomy("json", "JSON"),
-                new Taxonomy("kusto", "Kusto"),
-                new Taxonomy("md", "Markdown"),
-                new Taxonomy("mof", "Managed Object Format"),
-                new Taxonomy("nodejs", "Node.js"),
-                new Taxonomy("objc", "Objective-C"),
-                new Taxonomy("odata", "Odata"),
-                new Taxonomy("php", "PHP"),
-                new Taxonomy("powerappsfl", "PowerApps Formula"),
-                new Taxonomy("powershell", "PowerShell"),
-                new Taxonomy("python", "Python"),
-                new Taxonomy("qsharp", "Q#"),
-                new Taxonomy("r", "R"),
-                new Taxonomy("rest", "REST API"),
-                new Taxonomy("ruby", "Ruby"),
-                new Taxonomy("sql", "SQL"),
-                new Taxonomy("scala", "Scala"),
-                new Taxonomy("solidity", "Solidity"),
-                new Taxonomy("swift", "Swift"),
-                new Taxonomy("tsql", "Transact-SQL"),
-                new Taxonomy("typescript", "TypeScript"),
-                new Taxonomy("usql", "U-SQL"),
-                new Taxonomy("vb", "Visual Basic"),
-                new Taxonomy("vba", "Visual Basic for Applications"),
-                new Taxonomy("vbs", "Visual Basic Script"),
-                new Taxonomy("vstscli", "VSTS CLI"),
-                new Taxonomy("XAML", "XAML"),
-                new Taxonomy("xml", "XML"),
-                new Taxonomy("yaml", "YAML")
+                ["aspx"] = new Taxonomy("aspx", "ASP.NET"),
+                ["aspx-csharp"] = new Taxonomy("aspx-csharp", "ASP.NET (C#)"),
+                ["aspx-vb"] = new Taxonomy("aspx-vb", "ASP.NET (VB)"),
+                ["azcopy"] = new Taxonomy("azcopy", "AZCopy"),
+                ["azurecli"] = new Taxonomy("azurecli", "Azure CLI"),
+                ["azurepowershell"] = new Taxonomy("azurepowershell", "Azure PowerShell"),
+                ["brainscript"] = new Taxonomy("brainscript", "BrainScript"),
+                ["c"] = new Taxonomy("c", "C"),
+                ["cpp"] = new Taxonomy("cpp", "C++"),
+                ["cppcx"] = new Taxonomy("cppcx", "C++/CX"),
+                ["cppwinrt"] = new Taxonomy("cppwinrt", "C++/WIN RT"),
+                ["csharp"] = new Taxonomy("csharp", "C#"),
+                ["cshtml"] = new Taxonomy("cshtml", "CSHTML"),
+                ["dax"] = new Taxonomy("dax", "DAX"),
+                ["fsharp"] = new Taxonomy("fsharp", "F#"),
+                ["go"] = new Taxonomy("go", "Go"),
+                ["html"] = new Taxonomy("html", "HTML"),
+                ["http"] = new Taxonomy("http", "HTTP"),
+                ["java"] = new Taxonomy("java", "Java"),
+                ["javascript"] = new Taxonomy("javascript", "JavaScript"),
+                ["json"] = new Taxonomy("json", "JSON"),
+                ["kusto"] = new Taxonomy("kusto", "Kusto"),
+                ["md"] = new Taxonomy("md", "Markdown"),
+                ["mof"] = new Taxonomy("mof", "Managed Object Format"),
+                ["nodejs"] = new Taxonomy("nodejs", "Node.js"),
+                ["objc"] = new Taxonomy("objc", "Objective-C"),
+                ["odata"] = new Taxonomy("odata", "Odata"),
+                ["php"] = new Taxonomy("php", "PHP"),
+                ["powerappsfl"] = new Taxonomy("powerappsfl", "PowerApps Formula"),
+                ["powershell"] = new Taxonomy("powershell", "PowerShell"),
+                ["python"] = new Taxonomy("python", "Python"),
+                ["qsharp"] = new Taxonomy("qsharp", "Q#"),
+                ["r"] = new Taxonomy("r", "R"),
+                ["rest"] = new Taxonomy("rest", "REST API"),
+                ["ruby"] = new Taxonomy("ruby", "Ruby"),
+                ["sql"] = new Taxonomy("sql", "SQL"),
+                ["scala"] = new Taxonomy("scala", "Scala"),
+                ["solidity"] = new Taxonomy("solidity", "Solidity"),
+                ["swift"] = new Taxonomy("swift", "Swift"),
+                ["tsql"] = new Taxonomy("tsql", "Transact-SQL"),
+                ["typescript"] = new Taxonomy("typescript", "TypeScript"),
+                ["usql"] = new Taxonomy("usql", "U-SQL"),
+                ["vb"] = new Taxonomy("vb", "Visual Basic"),
+                ["vba"] = new Taxonomy("vba", "Visual Basic for Applications"),
+                ["vbs"] = new Taxonomy("vbs", "Visual Basic Script"),
+                ["vstscli"] = new Taxonomy("vstscli", "VSTS CLI"),
+                ["XAML"] = new Taxonomy("XAML", "XAML"),
+                ["xml"] = new Taxonomy("xml", "XML"),
+                ["yaml"] = new Taxonomy("yaml", "YAML")
             };
     }
 

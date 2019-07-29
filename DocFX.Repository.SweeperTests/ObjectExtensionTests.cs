@@ -144,10 +144,8 @@ sections:";
 
                 var slug = TrimAndNullIfEmpty(split[1]);
                 var labl = TrimAndNullIfEmpty(split[2]);
-                var msft = TrimAndNullIfEmpty(split[3]);
-                var lmpg = TrimAndNullIfEmpty(split[4]);
 
-                _output.WriteLine($"                new Taxonomy({slug}, {labl}, {msft}, {lmpg}),");
+                _output.WriteLine($"                [{slug}] = new Taxonomy({slug}, {labl}),");
             }
         }
 

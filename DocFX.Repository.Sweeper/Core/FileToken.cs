@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DocFX.Repository.Sweeper.Extensions;
+using DocFX.Repository.Sweeper.OpenPublishing;
 
 namespace DocFX.Repository.Sweeper.Core
 {
@@ -28,6 +29,7 @@ namespace DocFX.Repository.Sweeper.Core
             }
         }
 
+        public Metadata? Header { get; private set; }
         public string FilePath => _fileInfo?.FullName;
         public FileType FileType { get; }
         public ISet<string> TopicsReferenced { get; } = new HashSet<string>();
@@ -85,6 +87,11 @@ namespace DocFX.Repository.Sweeper.Core
             var lines = await _readAllLinesTask.Value;
             var dir = _fileInfo?.DirectoryName;
             var type = FileType;
+
+            if (type == FileType.Markdown && Metadata.TryParse(lines, out var metadata))
+            {
+                Header = metadata;
+            }
 
             foreach (var link in
                 lines.SelectMany(line => FindAllLinksInLine(line, FileTypeUtils.MapExpressions(type)))
