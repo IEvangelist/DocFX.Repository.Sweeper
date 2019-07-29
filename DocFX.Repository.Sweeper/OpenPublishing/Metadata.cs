@@ -10,10 +10,10 @@ namespace DocFX.Repository.Sweeper.OpenPublishing
             RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.ExplicitCapture;
 
         internal static readonly Regex GitHubAuthorRegex =
-            new Regex(@"\Aauthor:\W\b(?'author'.+?)\b", Options);
+            new Regex(@"\Aauthor:\s*\b(?'author'.+?)\b", Options);
 
         internal static readonly Regex MicrosoftAuthorRegex =
-            new Regex(@"ms.author:\W\b(?'author'.+?)\b", Options);
+            new Regex(@"ms.author:\s*\b(?'author'.+?)\b", Options);
 
         public string GitHubAuthor;
         public string MicrosoftAuthor;
@@ -25,8 +25,7 @@ namespace DocFX.Repository.Sweeper.OpenPublishing
             var count = 0;
             bool ParsingMetadata(string line)
             {
-                var trimmed = line.Trim();
-                if (trimmed == "---")
+                if (line?.Trim() == "---")
                 {
                     ++ count;
                 }
@@ -37,7 +36,7 @@ namespace DocFX.Repository.Sweeper.OpenPublishing
             metadata = new Metadata();
             foreach (var line in 
                 lines?.Where(line => !string.IsNullOrWhiteSpace(line))
-                      .TakeWhile(ParsingMetadata))
+                      .TakeWhile(ParsingMetadata) ?? Enumerable.Empty<string>())
             {
                 if (TryFindAuthor(GitHubAuthorRegex, line, out var gitHubAuthor))
                 {
