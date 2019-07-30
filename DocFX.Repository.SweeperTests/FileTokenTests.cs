@@ -1,4 +1,5 @@
 ﻿using DocFX.Repository.Sweeper.Core;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -38,6 +39,13 @@ namespace DocFX.Repository.SweeperTests
             Assert.NotNull(token.Header);
             Assert.Equal("dapine", token.Header.Value.MicrosoftAuthor);
             Assert.Equal("IEvangelist", token.Header.Value.GitHubAuthor);
+
+            Assert.True(token.ContainsInvalidCodeFenceSlugs);
+            Assert.Contains(new KeyValuePair<int, string>(33, "csharp"), token.CodeFenceSlugs);
+            Assert.Contains(new KeyValuePair<int, string>(40, "c#"), token.CodeFenceSlugs);
+            Assert.Contains(new KeyValuePair<int, string>(44, "js"), token.CodeFenceSlugs);
+            Assert.Contains(new KeyValuePair<int, string>(52, "javascript"), token.CodeFenceSlugs);
+            Assert.Equal(2, token.UnrecognizedCodeFenceSlugs.Count());
 
             Assert.Equal(expectedTokens.Where(t => t.FileType == FileType.Image).Count(), token.ImagesReferenced.Count);
             Assert.Equal(expectedTokens.Where(t => t.FileType == FileType.Markdown).Count(), token.TopicsReferenced.Count);

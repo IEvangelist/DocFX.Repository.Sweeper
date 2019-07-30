@@ -13,9 +13,12 @@ namespace DocFX.Repository.Sweeper.Core
     {
         static readonly RegexOptions Options = RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase;
         static readonly Regex FileExtensionRegex = new Regex("(\\.\\w+$)", Options);
+        static readonly char[] InvalidPathCharacters = Path.GetInvalidPathChars();
 
         readonly FileInfo _fileInfo;
         readonly Lazy<Task<string[]>> _readAllLinesTask;
+
+        IDictionary<int, string> _codeFenceSlugs;
 
         public FileToken(FileInfo file)
         {
@@ -30,13 +33,30 @@ namespace DocFX.Repository.Sweeper.Core
         }
 
         public Metadata? Header { get; private set; }
+
         public string FilePath => _fileInfo?.FullName;
+
         public FileType FileType { get; }
+
         public ISet<string> TopicsReferenced { get; } = new HashSet<string>();
+
         public ISet<string> ImagesReferenced { get; } = new HashSet<string>();
+
+        public IDictionary<int, string> CodeFenceSlugs => _codeFenceSlugs ?? (_codeFenceSlugs = new Dictionary<int, string>());
+
         public int TotalReferences => TopicsReferenced.Count + ImagesReferenced.Count;
+
         public bool IsRelevant => FileType != FileType.NotRelevant && FileType != FileType.Json;
+
         public bool IsMarkedForDeletion { get; set; }
+
+        public IEnumerable<(int, string)> UnrecognizedCodeFenceSlugs
+            => _codeFenceSlugs is null
+                ? Enumerable.Empty<(int, string)>()
+                : _codeFenceSlugs.Where(kvp => !Taxonomies.Languages.ContainsKey(kvp.Value))
+                                 .Select(kvp => (kvp.Key, kvp.Value));
+
+        public bool ContainsInvalidCodeFenceSlugs => UnrecognizedCodeFenceSlugs.Any();
 
         public override string ToString()
         {
@@ -93,14 +113,24 @@ namespace DocFX.Repository.Sweeper.Core
                 Header = metadata;
             }
 
-            foreach (var link in
-                lines.SelectMany(line => FindAllLinksInLine(line, FileTypeUtils.MapExpressions(type)))
-                     .Where(link => !string.IsNullOrEmpty(link)))
+            foreach (var (tokenType, tokenValue, lineNumber) in
+                lines.SelectMany((line, lineNumber) => FindAllTokensInLine(line, lineNumber + 1, FileTypeUtils.MapExpressions(type)))
+                     .Where(tuple => !string.IsNullOrEmpty(tuple.Item2)))
             {
-                var path = Path.Combine(dir, link);
-                if (File.Exists(path))
+                if (tokenType == TokenType.CodeFence)
                 {
-                    var file = new FileInfo(path);
+                    CodeFenceSlugs[lineNumber] = tokenValue;
+                    continue;
+                }
+
+                if (tokenType == TokenType.Unrecognizable)
+                {
+                    continue;
+                }
+
+                if (TryFindFile(dir, tokenValue, out var fullPath))
+                {
+                    var file = new FileInfo(fullPath);
                     switch (file.GetFileType())
                     {
                         case FileType.Image:
@@ -114,42 +144,48 @@ namespace DocFX.Repository.Sweeper.Core
             }
         }
 
-        IEnumerable<string> FindAllLinksInLine(string line, IEnumerable<Regex> expressions)
+        IEnumerable<(TokenType, string, int)> FindAllTokensInLine(string line, int lineNumber, IEnumerable<Regex> expressions)
         {
-            IEnumerable<string> GetMatchingValues(Match match)
+            IEnumerable<(TokenType, string)> GetMatchingValues(Match match)
             {
                 if (match is null)
                 {
                     yield break;
                 }
 
+                if (match.Groups.Any(grp => grp.Name == "slug"))
+                {
+                    yield return (TokenType.CodeFence, match.Groups["slug"].Value);
+                }
+
                 if (match.Groups.Any(grp => grp.Name == "link"))
                 {
-                    yield return match.Groups["link"].Value;
+                    yield return (TokenType.FileReference, match.Groups["link"].Value);
                 }
 
                 foreach (Group group in match.Groups)
                 {
-                    yield return group.Value;
+                    yield return (TokenType.FileReference, group.Value);
                 }
             }
 
             foreach (var value in
                 expressions.SelectMany(ex => ex.Matches(line))
-                           .SelectMany(GetMatchingValues)
-                           .Select(Uri.UnescapeDataString))
+                           .SelectMany(GetMatchingValues))
             {
-                yield return CleanMatching(value);
+                var (tokenType, tokenValue) = CleanMatching(value);
+                yield return (tokenType, tokenValue, lineNumber);
             }
         }
 
-        string CleanMatching(string value)
+        (TokenType, string) CleanMatching((TokenType tokenType, string tokenValue) tuple)
         {
+            var (type, value) = tuple;
             if (string.IsNullOrWhiteSpace(value) ||
                 value.StartsWith("http", StringComparison.OrdinalIgnoreCase) ||
                 value.StartsWith("#"))
             {
-                return null;
+                return default;
             }
 
             value = value.Trim();
@@ -166,12 +202,19 @@ namespace DocFX.Repository.Sweeper.Core
                 value = value.Substring(5);
             }
 
+            if (type == TokenType.CodeFence)
+            {
+                return (type, value);
+            }
+
             var cleaned =
                 StripQueryStringOrHeaderLink(value)
                     .Replace("~", "..")
                     .Replace("/azure/", "/articles/");
+            var unescaped =
+                Uri.UnescapeDataString(cleaned);
 
-            return FileExtensionRegex.IsMatch(cleaned) ? cleaned : $"{cleaned}.md";
+            return (type, unescaped);
         }
 
         static string StripQueryStringOrHeaderLink(string value)
@@ -189,6 +232,45 @@ namespace DocFX.Repository.Sweeper.Core
 
             value = SplitOn(value, "#");
             return SplitOn(value, "?");
+        }
+
+        static bool TryFindFile(string directory, string filePath, out string fullPath)
+        {
+            if (string.IsNullOrWhiteSpace(directory) ||
+                string.IsNullOrWhiteSpace(filePath))
+            {
+                fullPath = null;
+                return false;
+            }
+
+            if (filePath.IndexOfAny(InvalidPathCharacters) != -1)
+            {
+                fullPath = null;
+                return false;
+            }
+
+            var path = Path.Combine(directory, filePath);
+            if (FileExtensionRegex.IsMatch(path))
+            {
+                fullPath = path;
+                return File.Exists(path);
+            }
+
+            try
+            {
+                var files = Directory.GetFiles(directory, $"{filePath}.*");
+                if (files.Length > 0)
+                {
+                    fullPath = files[0];
+                    return true;
+                }
+            }
+            catch
+            {
+            }
+
+            fullPath = null;
+            return false;
         }
     }
 }

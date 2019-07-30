@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 
 namespace DocFX.Repository.Sweeper.OpenPublishing
 {
     public class Taxonomies
     {
-        public static readonly Regex CodeFenceRegex =
-            new Regex("```\b(?'slug'.+?)\b", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.Singleline);
-
         // https://review.docs.microsoft.com/en-us/new-hope/information-architecture/metadata/taxonomies?branch=master#dev-lang
         public static IDictionary<string, Taxonomy> Languages { get; } =
             new Dictionary<string, Taxonomy>(StringComparer.OrdinalIgnoreCase)

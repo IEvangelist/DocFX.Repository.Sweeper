@@ -105,10 +105,11 @@ namespace DocFX.Repository.Sweeper.Core
             try
             {
                 _httpClient = _httpClient ?? new HttpClient();
-                var response = await _httpClient.GetAsync(redirectUrl);
-
-                return _validRedirectUrlCache[redirectUrl] =
-                    response.StatusCode != HttpStatusCode.NotFound;
+                using (var response = await _httpClient.GetAsync(redirectUrl))
+                {
+                    var validUrl = response.StatusCode != HttpStatusCode.NotFound;
+                    return _validRedirectUrlCache[redirectUrl] = validUrl;
+                }
             }
             catch (Exception ex)
             {

@@ -28,6 +28,31 @@ I really like whitespace, ugh! ![seriously]( ./media/serious.png )
 </table>
 ![why do people format it this way...](./media/context/image-five.png
  "ugh :facepalm:")
+
+
+```csharp
+public static T ThisIsCool<T>() where T : new()
+{
+	 return new T();
+}
+```
+
+```c#
+Moments later, we realized that this slug is actually not valid.
+```
+ 
+```js
+{
+... { array }
+}
+```
+
+or is it actually?
+
+```javascript
+This might be right?
+```
+
 [1]: ./image-four.png
 [2]: ref-four.md
 [Contact]: ./ref-five.md "more blah..."
