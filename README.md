@@ -74,4 +74,7 @@ Here is an example output:
 ## The future
 
   - [x] Automatically update the `.openpublishing.redirection.json` when orphaned topics are deleted.
+  - [x] Add parsed `metadata` file headers to `FileToken` (markdown files).
   - [ ] Identity and correct, inproper usage of code fence slugs.
+  - [ ] Add `-e` switch to email author file details (include all files and JSON for redirect) for orphaned markdown files.
+  - [ ] Automatic creation of an issue in GitHub based on incorrect code fence or orphaned markdown files.

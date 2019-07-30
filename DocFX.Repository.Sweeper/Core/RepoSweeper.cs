@@ -13,9 +13,10 @@ namespace DocFX.Repository.Sweeper.Core
 {
     public class RepoSweeper
     {
+        int _filesActedOnCount = 0;
+
         readonly FileTokenizer _fileTokenizer = new FileTokenizer();
         readonly RedirectionAppender _redirectionAppender = new RedirectionAppender();
-        int _filesActedOnCount = 0;
 
         public async Task<SweepSummary> SweepAsync(Options options, Stopwatch stopwatch)
         {
