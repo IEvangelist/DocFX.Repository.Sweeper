@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DocFX.Repository.Sweeper.Core
@@ -13,7 +14,8 @@ namespace DocFX.Repository.Sweeper.Core
     public class RepoSweeper
     {
         readonly FileTokenizer _fileTokenizer = new FileTokenizer();
-        readonly RedirectionAppender _redirectionAppender = new RedirectionAppender();        
+        readonly RedirectionAppender _redirectionAppender = new RedirectionAppender();
+        int _filesActedOnCount = 0;
 
         public async Task<SweepSummary> SweepAsync(Options options, Stopwatch stopwatch)
         {
@@ -43,6 +45,15 @@ namespace DocFX.Repository.Sweeper.Core
                         .Where(IsRelevantToken)
                         .OrderBy(type => type))
             {
+                if (type == FileType.Image && !options.FindOrphanedImages)
+                {
+                    continue;
+                }
+                if (type == FileType.Markdown && !options.FindOrphanedTopics)
+                {
+                    continue;
+                }
+
                 var allTokens = tokenMap[type];
 
                 typeStopwatch.Restart();
@@ -69,7 +80,7 @@ namespace DocFX.Repository.Sweeper.Core
                 {
                     Parallel.ForEach(
                         tokens.OrderBy(token => token.FilePath),
-                        token =>
+                        (token, state) =>
                         {
                             var relative = directory.MakeRelativeUri(new Uri(token.FilePath));
                             progressBar.Tick($"{type} files...{relative}");
@@ -84,23 +95,30 @@ namespace DocFX.Repository.Sweeper.Core
                                 return;
                             }
 
+                            var markedForDeletion = false;
                             switch (token.FileType)
                             {
                                 case FileType.Markdown:
-                                    if (options.FindOrphanedTopics)
+                                    if (options.FindOrphanedTopics && orphanedTopics.Add(token.FilePath))
                                     {
-                                        orphanedTopics.Add(token.FilePath);
-                                        token.IsMarkedForDeletion = options.Delete;
+                                        markedForDeletion = token.IsMarkedForDeletion = options.Delete;
                                     }
                                     break;
 
                                 case FileType.Image:
-                                    if (options.FindOrphanedImages)
+                                    if (options.FindOrphanedImages && orphanedImages.Add(token.FilePath))
                                     {
-                                        orphanedImages.Add(token.FilePath);
-                                        token.IsMarkedForDeletion = options.Delete;
+                                        markedForDeletion = token.IsMarkedForDeletion = options.Delete;
                                     }
                                     break;
+                            }
+
+                            if (markedForDeletion && options.DeletionLimit > 0)
+                            {
+                                if (options.DeletionLimit - 1 == Interlocked.Increment(ref _filesActedOnCount))
+                                {
+                                    state.Break();
+                                }
                             }
                         });
 

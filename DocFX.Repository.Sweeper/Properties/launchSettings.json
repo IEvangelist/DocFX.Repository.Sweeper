@@ -2,7 +2,7 @@
   "profiles": {
     "DocFX.Repository.Sweeper": {
       "commandName": "Project",
-      "commandLineArgs": "-d -r -s \"C:\\Repos\\azure-docs-pr\\articles\""
+      "commandLineArgs": "--delete --images --limit 100 --directory \"C:\\Repos\\azure-docs-pr\\articles\\active-directory\""
     }
   }
 }
