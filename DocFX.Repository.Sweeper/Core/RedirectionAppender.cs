@@ -2,6 +2,7 @@
 using DocFX.Repository.Sweeper.OpenPublishing;
 using Kurukuru;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -20,7 +21,7 @@ namespace DocFX.Repository.Sweeper.Core
         static readonly IDictionary<string, bool> _validRedirectUrlCache =
             new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
 
-        internal async Task ApplyRedirectsAsync(ISet<string> files, Options options)
+        internal async Task ApplyRedirectsAsync(IEnumerable<string> files, Options options)
         {
             var redirectConfig =
                 await FindJsonFileAsync<RedirectConfig>(

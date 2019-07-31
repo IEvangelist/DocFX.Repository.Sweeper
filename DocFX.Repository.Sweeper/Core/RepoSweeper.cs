@@ -6,15 +6,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace DocFX.Repository.Sweeper.Core
 {
     public class RepoSweeper
     {
-        int _filesActedOnCount = 0;
-
         readonly FileTokenizer _fileTokenizer = new FileTokenizer();
         readonly RedirectionAppender _redirectionAppender = new RedirectionAppender();
 
@@ -96,30 +93,21 @@ namespace DocFX.Repository.Sweeper.Core
                                 return;
                             }
 
-                            var markedForDeletion = false;
                             switch (token.FileType)
                             {
                                 case FileType.Markdown:
                                     if (options.FindOrphanedTopics && orphanedTopics.Add(token.FilePath))
                                     {
-                                        markedForDeletion = token.IsMarkedForDeletion = options.Delete;
+                                        token.IsMarkedForDeletion = options.Delete;
                                     }
                                     break;
 
                                 case FileType.Image:
                                     if (options.FindOrphanedImages && orphanedImages.Add(token.FilePath))
                                     {
-                                        markedForDeletion = token.IsMarkedForDeletion = options.Delete;
+                                        token.IsMarkedForDeletion = options.Delete;
                                     }
                                     break;
-                            }
-
-                            if (markedForDeletion && options.DeletionLimit > 0)
-                            {
-                                if (options.DeletionLimit - 1 == Interlocked.Increment(ref _filesActedOnCount))
-                                {
-                                    state.Break();
-                                }
                             }
                         });
 
@@ -173,6 +161,12 @@ namespace DocFX.Repository.Sweeper.Core
             {
                 type.WriteLine($"Found {files.Count:#,#} orphaned {type} files.");
 
+                IEnumerable<string> LimitFiles(ISet<string> values, Options opts)
+                {
+                    return values.TakeWhile((_, index) => opts.DeletionLimit == 0 || index < opts.DeletionLimit);
+                }
+
+                var workingFiles = LimitFiles(files, options);
                 foreach (var (ext, count) in
                     files.Select(file => Path.GetExtension(file).ToUpper())
                          .GroupBy(ext => ext)
@@ -185,10 +179,10 @@ namespace DocFX.Repository.Sweeper.Core
                 {
                     if (type == FileType.Markdown && options.ApplyRedirects)
                     {
-                        await _redirectionAppender.ApplyRedirectsAsync(files, options);
+                        await _redirectionAppender.ApplyRedirectsAsync(workingFiles, options);
                     }
 
-                    foreach (var file in files.Where(File.Exists))
+                    foreach (var file in workingFiles.Where(File.Exists))
                     {
                         if (options.OutputWarnings)
                         {
@@ -198,7 +192,7 @@ namespace DocFX.Repository.Sweeper.Core
                         File.Delete(file);
                     }
 
-                    type.WriteLine($"Deleted {files.Count():#,#} {type} files.");
+                    type.WriteLine($"Deleted {workingFiles.Count():#,#} {type} files.");
                 }
 
                 Console.WriteLine();
