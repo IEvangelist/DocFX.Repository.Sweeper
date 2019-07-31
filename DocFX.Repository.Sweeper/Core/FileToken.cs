@@ -128,9 +128,9 @@ namespace DocFX.Repository.Sweeper.Core
                     continue;
                 }
 
-                if (TryFindFile(dir, tokenValue, out var fullPath))
+                if (TryFindFile(dir, tokenValue, out var fullPath) && !string.IsNullOrWhiteSpace(fullPath))
                 {
-                    var file = new FileInfo(fullPath);
+                    var file = new FileInfo(fullPath.NormalizePathDelimitors());
                     switch (file.GetFileType())
                     {
                         case FileType.Image:

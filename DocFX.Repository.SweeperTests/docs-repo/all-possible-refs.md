@@ -53,6 +53,8 @@ or is it actually?
 This might be right?
 ```
 
+	![Select Menu, then System, and then Administration](./media/more.jpg)
+
 [1]: ./image-four.png
 [2]: ref-four.md
 [Contact]: ./ref-five.md "more blah..."

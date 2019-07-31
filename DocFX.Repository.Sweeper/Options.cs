@@ -17,6 +17,8 @@ namespace DocFX.Repository.Sweeper
 
         public DirectoryInfo Directory => _sourceDirectory.Value;
 
+        public string NormalizedDirectory => Directory?.FullName.NormalizePathDelimitors() ?? null;
+
         public Uri DirectoryUri => _directoryUri.Value;
 
         [Option('s', "directory", Required = true, HelpText = "The source directory to act on (can be subdirectory or top-level).")]

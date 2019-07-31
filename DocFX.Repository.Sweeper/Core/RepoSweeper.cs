@@ -88,7 +88,7 @@ namespace DocFX.Repository.Sweeper.Core
                                 return;
                             }
 
-                            if (!IsTokenWithinScopedDirectory(token, options.SourceDirectory, directoryStringLength))
+                            if (!IsTokenWithinScopedDirectory(token, options.NormalizedDirectory))
                             {
                                 return;
                             }
@@ -134,17 +134,8 @@ namespace DocFX.Repository.Sweeper.Core
             };
         }
 
-        static bool IsTokenWithinScopedDirectory(FileToken token, string sourceDir, int directoryStringLength)
-        {
-            var tokenPath =
-                token.FilePath.Length > directoryStringLength
-                    ? token.FilePath.Substring(0, directoryStringLength)
-                    : null;
-            var isWithinScopedDirectory =
-                tokenPath?.Equals(sourceDir, StringComparison.OrdinalIgnoreCase) ?? false;
-
-            return isWithinScopedDirectory;
-        }
+        static bool IsTokenWithinScopedDirectory(FileToken token, string sourceDir) 
+            => token?.FilePath?.IndexOf(sourceDir, StringComparison.OrdinalIgnoreCase) != -1;
 
         static bool IsTokenReferencedAnywhere(FileToken fileToken, IEnumerable<FileToken> tokens)
             => tokens.Where(token => token != fileToken)
@@ -163,7 +154,8 @@ namespace DocFX.Repository.Sweeper.Core
 
                 IEnumerable<string> LimitFiles(ISet<string> values, Options opts)
                 {
-                    return values.TakeWhile((_, index) => opts.DeletionLimit == 0 || index < opts.DeletionLimit);
+                    return values.OrderBy(fileName => fileName)
+                                 .TakeWhile((_, index) => opts.DeletionLimit == 0 || index < opts.DeletionLimit);
                 }
 
                 var workingFiles = LimitFiles(files, options);
