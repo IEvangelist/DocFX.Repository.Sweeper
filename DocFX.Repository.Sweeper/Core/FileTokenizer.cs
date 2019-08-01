@@ -1,5 +1,4 @@
-﻿using DocFX.Repository.Sweeper.Extensions;
-using Kurukuru;
+﻿using Kurukuru;
 using ShellProgressBar;
 using System;
 using System.Collections.Concurrent;
@@ -42,7 +41,7 @@ namespace DocFX.Repository.Sweeper.Core
                     async file =>
                     {
                         var fileToken = new FileToken(file);
-                        await fileToken.InitializeAsync();
+                        await fileToken.InitializeAsync(options);
 
                         progressBar.Tick($"Tokenizing files...{ToRelativePath(fileToken.FilePath, directoryLength)}");
                         if (map.TryGetValue(fileToken.FileType, out var tokens))

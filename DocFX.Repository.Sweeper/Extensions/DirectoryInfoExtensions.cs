@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace DocFX.Repository.Sweeper.Extensions
+namespace DocFX.Repository.Sweeper
 {
     static class DirectoryInfoExtensions
     {

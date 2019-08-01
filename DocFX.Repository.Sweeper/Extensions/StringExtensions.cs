@@ -1,4 +1,7 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace DocFX.Repository.Sweeper
 {
@@ -11,5 +14,41 @@ namespace DocFX.Repository.Sweeper
                     appendDirectorySeparatorSuffix && !path.EndsWith(Path.DirectorySeparatorChar)
                         ? $"{path}{Path.DirectorySeparatorChar}"
                         : path);
+
+        internal static async Task<T> FindJsonFileAsync<T>(this string directory, string filename)
+        {
+            var dir = new DirectoryInfo(directory).TraverseToFile(filename);
+            var filepath = Path.Combine(dir.FullName, filename);
+            if (File.Exists(filepath))
+            {
+                var json = await File.ReadAllTextAsync(filepath);
+                return json.FromJson<T>();
+            }
+
+            return default;
+        }
+
+        public static string MergePath(this string directory, string filePath)
+        {
+            if (string.IsNullOrWhiteSpace(directory) ||
+                string.IsNullOrWhiteSpace(filePath))
+            {
+                return null;
+            }
+
+            if (filePath.StartsWith('~') || filePath.StartsWith(".."))
+            {
+                return Path.Combine(directory, filePath);
+            }
+
+            var directorySegments = directory.Split(Path.DirectorySeparatorChar);
+            var pathSegments = filePath.Replace('/', Path.DirectorySeparatorChar).Split(Path.DirectorySeparatorChar);
+            var segments = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            directorySegments.For(segment => segments.Add(segment));
+            pathSegments.For(segment => segments.Add(segment));
+
+            return string.Join(Path.DirectorySeparatorChar, segments);
+        }
     }
 }

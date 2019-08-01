@@ -1,8 +1,6 @@
-﻿using DocFX.Repository.Sweeper.Extensions;
-using DocFX.Repository.Sweeper.OpenPublishing;
+﻿using DocFX.Repository.Sweeper.OpenPublishing;
 using Kurukuru;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -23,22 +21,14 @@ namespace DocFX.Repository.Sweeper.Core
 
         internal async Task ApplyRedirectsAsync(IEnumerable<string> files, Options options)
         {
-            var redirectConfig =
-                await FindJsonFileAsync<RedirectConfig>(
-                    ".openpublishing.redirection.json",
-                    options.SourceDirectory);
-
+            var redirectConfig = await options.GetRedirectConfigAsync();
             if (redirectConfig?.Redirections.Any() ?? false)
             {
                 await Spinner.StartAsync("Validating redirect URLs.", async spinner =>
                 {
                     spinner.Color = ConsoleColor.Blue;
 
-                    var docfx =
-                    await FindJsonFileAsync<DocFxConfig>(
-                        "docfx.json",
-                        options.SourceDirectory);
-
+                    var docfx = await options.GetConfigAsync();
                     var dest = docfx?.Build?.Dest;
                     var sourceDirectory = options.Directory.Parent;
                     var redirectMap = new Dictionary<string, ISet<Redirect>>(StringComparer.OrdinalIgnoreCase);
@@ -143,25 +133,6 @@ namespace DocFX.Repository.Sweeper.Core
             {
                 ConsoleColor.DarkMagenta.WriteLine($"Unable to apply redirects. {ex.Message}");
             }
-        }
-
-        static Task<T> FindJsonFileAsync<T>(string filename, string directory)
-            => FindFileAsync(filename, directory, json => json.FromJson<T>());
-
-        static Task<T> FindYamlFileAsync<T>(string filename, string directory)
-            => FindFileAsync(filename, directory, yaml => yaml.FromYaml<T>());
-
-        static async Task<T> FindFileAsync<T>(string filename, string directory, Func<string, T> parse)
-        {
-            var dir = new DirectoryInfo(directory).TraverseToFile(filename);
-            var filepath = Path.Combine(dir.FullName, filename);
-            if (File.Exists(filepath))
-            {
-                var json = await File.ReadAllTextAsync(filepath);
-                return parse(json);
-            }
-
-            return default;
         }
 
         static string ToRedirectUrl(string sourcePath, string dest, string index)

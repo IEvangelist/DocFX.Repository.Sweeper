@@ -25,6 +25,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="docs-repo\media\index\link.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="docs-repo\docfx.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

@@ -55,6 +55,10 @@ This might be right?
 
 	![Select Menu, then System, and then Administration](./media/more.jpg)
 
+	![Ugh, so mad at people for doing this](https://docs.microsoft.com/azure/media/index/link.png)
+
+
+
 [1]: ./image-four.png
 [2]: ref-four.md
 [Contact]: ./ref-five.md "more blah..."

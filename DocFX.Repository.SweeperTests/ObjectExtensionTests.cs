@@ -1,4 +1,4 @@
-﻿using DocFX.Repository.Sweeper.Extensions;
+﻿using DocFX.Repository.Sweeper;
 using DocFX.Repository.Sweeper.OpenPublishing;
 using System.Collections.Generic;
 using System.IO;
@@ -22,7 +22,8 @@ namespace DocFX.Repository.SweeperTests
             var docfx = json.FromJson<DocFxConfig>();
 
             Assert.NotNull(docfx);
-            Assert.Equal("azure", docfx.Build?.Dest);
+            Assert.Equal("azure", docfx.Build.Dest);
+            Assert.Equal("articles", docfx.Build.Content[0].Src);
         }
 
         [Fact]

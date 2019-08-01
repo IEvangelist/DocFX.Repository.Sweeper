@@ -1,5 +1,5 @@
+using DocFX.Repository.Sweeper;
 using DocFX.Repository.Sweeper.Core;
-using DocFX.Repository.Sweeper.Extensions;
 using System.Collections.Generic;
 using System.IO;
 using Xunit;

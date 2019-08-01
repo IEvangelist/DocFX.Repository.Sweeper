@@ -8,11 +8,13 @@ namespace DocFX.Repository.Sweeper
     {
         readonly Lazy<DirectoryInfo> _sourceDirectory;
         readonly Lazy<Uri> _directoryUri;
+        readonly Lazy<Uri> _hostUri;
 
         public Options()
         {
             _sourceDirectory = new Lazy<DirectoryInfo>(() => new DirectoryInfo(SourceDirectory));
             _directoryUri = new Lazy<Uri>(() => new Uri(SourceDirectory));
+            _hostUri = new Lazy<Uri>(() => new Uri(HostUrl));
         }
 
         public DirectoryInfo Directory => _sourceDirectory.Value;
@@ -20,6 +22,8 @@ namespace DocFX.Repository.Sweeper
         public string NormalizedDirectory => Directory?.FullName.NormalizePathDelimitors() ?? null;
 
         public Uri DirectoryUri => _directoryUri.Value;
+
+        public Uri HostUri => _hostUri.Value;
 
         [Option('s', "directory", Required = true, HelpText = "The source directory to act on (can be subdirectory or top-level).")]
         public string SourceDirectory { get; set; }
@@ -43,7 +47,7 @@ namespace DocFX.Repository.Sweeper
         public bool ApplyRedirects { get; set; }
 
         [Option('h', "hosturl", Default = "https://docs.microsoft.com", HelpText = "If 'redirects' is true, this is required and is the host where the docs site is hosted.")]
-        public string HostUrl { get; set; }
+        public string HostUrl { get; set; } = "https://docs.microsoft.com";
 
         [Option('q', "query", HelpText = "If 'redirects' is true, this is an optional query string to be applied to redirect validation.")]
         public string QueryString { get; set; }

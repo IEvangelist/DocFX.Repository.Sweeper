@@ -1,5 +1,4 @@
-﻿using DocFX.Repository.Sweeper.Extensions;
-using Kurukuru;
+﻿using Kurukuru;
 using ShellProgressBar;
 using System;
 using System.Collections.Generic;

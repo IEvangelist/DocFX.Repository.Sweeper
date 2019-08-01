@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DocFX.Repository.Sweeper.Extensions
+namespace DocFX.Repository.Sweeper
 {
     // Inspired/Borrowed from: https://stackoverflow.com/a/21649465/2410379
     static class TimeSpanExtensions

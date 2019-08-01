@@ -1,6 +1,34 @@
 {
   "build": {
     "markdownEngineName": "markdig",
-    "dest": "azure"
+    "dest": "azure",
+    "content": [
+      {
+        "files": [
+          "**/*.md",
+          "**/*.yml"
+        ],
+        "exclude": [
+          "**/obj/**",
+          "**/includes/**",
+          "**/_themes/**"
+        ],
+        "src": "articles",
+        "dest": "."
+      },
+      {
+        "files": [
+          "**/*.md",
+          "**/*.yml"
+        ],
+        "exclude": [
+          "**/obj/**",
+          "**/includes/**",
+          "**/_themes/**"
+        ],
+        "src": "bread",
+        "dest": "bread"
+      }
+    ]
   }
 }

@@ -3,7 +3,7 @@ using Newtonsoft.Json.Serialization;
 using YamlDotNet.Serialization;
 using static Newtonsoft.Json.JsonConvert;
 
-namespace DocFX.Repository.Sweeper.Extensions
+namespace DocFX.Repository.Sweeper
 {
     public static class ObjectExtensions
     {

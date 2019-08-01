@@ -1,6 +1,5 @@
 ﻿using CommandLine;
 using DocFX.Repository.Sweeper.Core;
-using DocFX.Repository.Sweeper.Extensions;
 using System;
 using System.Diagnostics;
 using System.Text;

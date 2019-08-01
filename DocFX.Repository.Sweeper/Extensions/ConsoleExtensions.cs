@@ -1,7 +1,7 @@
 ﻿using DocFX.Repository.Sweeper.Core;
 using System;
 
-namespace DocFX.Repository.Sweeper.Extensions
+namespace DocFX.Repository.Sweeper
 {
     static class ConsoleExtensions
     {

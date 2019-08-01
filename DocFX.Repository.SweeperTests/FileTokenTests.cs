@@ -1,4 +1,5 @@
-﻿using DocFX.Repository.Sweeper.Core;
+﻿using DocFX.Repository.Sweeper;
+using DocFX.Repository.Sweeper.Core;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,12 +10,27 @@ namespace DocFX.Repository.SweeperTests
 {
     public class FileTokenTests
     {
+        // Uncomment to do explicit testing of actual files.
+        // [Fact]
+        //public async Task TestExplicitFileAsync()
+        //{
+        //    var dir = @"C:\Repos\azure-docs-pr\articles\active-directory-b2c";
+        //    var token = new FileToken(new FileInfo($"{dir}\\index.yml"));
+        //    await token.InitializeAsync(new Options
+        //    {
+        //        SourceDirectory = dir
+        //    });
+        //}
+
         [Fact]
         public async Task InitializesCorrectlyTest()
         {
             var dir = "docs-repo";
             var token = new FileToken(new FileInfo($"{dir}/all-possible-refs.md"));
-            await token.InitializeAsync();
+            await token.InitializeAsync(new Options
+            {
+                SourceDirectory = dir
+            });
 
             var expectedTokens = new[]
             {
@@ -34,6 +50,7 @@ namespace DocFX.Repository.SweeperTests
                 new FileToken(new FileInfo($"{dir}/media/more.jpg")),
                 new FileToken(new FileInfo($"{dir}/media/serious.png")),
                 new FileToken(new FileInfo($"{dir}/media/spaces.jpg")),
+                new FileToken(new FileInfo($"{dir}/media/index/link.png")),
                 new FileToken(new FileInfo($"{dir}/grandparent/media/csharp logo.png")),
             };
 

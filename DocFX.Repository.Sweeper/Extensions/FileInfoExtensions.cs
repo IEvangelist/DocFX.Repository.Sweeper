@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace DocFX.Repository.Sweeper.Extensions
+namespace DocFX.Repository.Sweeper
 {
     public static class FileInfoExtensions
     {
