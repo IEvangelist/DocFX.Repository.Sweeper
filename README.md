@@ -7,9 +7,9 @@ The `DocFX.Repository.Sweeper` (**sweeper**) is a tool for sweeping **DocFX** re
 
 > This project was directly inspired by [Genevieve Warren - @gewarren](https://github.com/gewarren) and her amazing [CleanRepo](https://github.com/gewarren/cleanrepo) tool.
 
-![Logo](sweeper-logo.png=200x200)
-
 ## :eyes: First impressions
+
+<img src="sweeper-logo.png" alt="Logo" width="300">
 
 This command-line tool helps to identify (and optionally delete) files within a **DocFX** repository that are not referenced by any other file.
 
