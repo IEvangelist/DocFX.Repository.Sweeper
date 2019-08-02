@@ -34,6 +34,9 @@ namespace DocFX.Repository.Sweeper
         [Option('i', "images", HelpText = "If true, finds orphaned image files (.png, .jpg, .jpeg, .gif, .svg).")]
         public bool FindOrphanedImages { get; set; }
 
+        [Option('e', "explicitScope", HelpText = "If true, will only evaluate cross references within the source directory (WARNING, this could cause errant deletions).")]
+        public bool ExplicitScope { get; set; }
+
         [Option('l', "limit", HelpText = "The number of files to limit for a given sweep (if not specified will eagerly delete all possible).")]
         public int DeletionLimit { get; set; }
 

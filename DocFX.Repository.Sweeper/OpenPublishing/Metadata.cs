@@ -24,8 +24,7 @@ namespace DocFX.Repository.Sweeper.OpenPublishing
 
         bool IsParsed
             => !string.IsNullOrWhiteSpace(GitHubAuthor)
-            && !string.IsNullOrWhiteSpace(MicrosoftAuthor)
-            && !string.IsNullOrWhiteSpace(Manager);
+            && !string.IsNullOrWhiteSpace(MicrosoftAuthor);
 
         public static bool TryParse(IEnumerable<string> lines, out Metadata metadata)
         {

@@ -59,7 +59,7 @@ namespace DocFX.Repository.Sweeper.Core
                     spinner.Succeed();
                 }, Patterns.Arc);
 
-                type.WriteLine($"Evaluating \"{type}\" files. Scanning for cross references through-out the entire DocFx doc set.");
+                type.WriteLine($"Evaluating \"{type}\" files. Scanning for cross references throughout the entire DocFx doc set.");
 
                 using (var progressBar =
                     new ProgressBar(

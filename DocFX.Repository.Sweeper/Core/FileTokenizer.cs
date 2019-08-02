@@ -13,8 +13,12 @@ namespace DocFX.Repository.Sweeper.Core
     {
         public async Task<(Status, IDictionary<FileType, IList<FileToken>>)> TokenizeAsync(Options options)
         {
-            var directoryLength = options.SourceDirectory.Length;
-            var dir = new DirectoryInfo(options.SourceDirectory).TraverseToFile("docfx.json");
+            var dirUri = options.DirectoryUri;
+            var dir =
+                options.ExplicitScope
+                    ? options.Directory
+                    : new DirectoryInfo(options.SourceDirectory).TraverseToFile("docfx.json");
+
             if (dir is null)
             {
                 return (Status.Error, null);
@@ -43,7 +47,7 @@ namespace DocFX.Repository.Sweeper.Core
                         var fileToken = new FileToken(file);
                         await fileToken.InitializeAsync(options);
 
-                        progressBar.Tick($"Tokenizing files...{ToRelativePath(fileToken.FilePath, directoryLength)}");
+                        progressBar.Tick($"Tokenizing files...{dirUri.ToRelativePath(fileToken.FilePath)}");
                         if (map.TryGetValue(fileToken.FileType, out var tokens))
                         {
                             tokens.Add(fileToken);
@@ -57,22 +61,6 @@ namespace DocFX.Repository.Sweeper.Core
             }
 
             return (Status.Success, map);
-        }
-
-        static string ToRelativePath(string filePath, int directoryLength)
-        {
-            try
-            {
-                var fileLength = filePath.Length;
-                return fileLength > directoryLength
-                    ? filePath.Substring(directoryLength, filePath.Length - directoryLength)
-                    : filePath;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                return filePath;
-            }
         }
     }
 }
