@@ -53,6 +53,7 @@ namespace DocFX.Repository.SweeperTests
                 new FileToken(new FileInfo($"{dir}/media/serious.png")),
                 new FileToken(new FileInfo($"{dir}/media/spaces.jpg")),
                 new FileToken(new FileInfo($"{dir}/media/index/link.png")),
+                new FileToken(new FileInfo($"{dir}/media/context/context/seriously-why.png")),
                 new FileToken(new FileInfo($"{dir}/grandparent/media/csharp logo.png")),
             };
 
