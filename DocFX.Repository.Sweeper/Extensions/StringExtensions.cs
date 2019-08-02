@@ -41,6 +41,17 @@ namespace DocFX.Repository.Sweeper
                 return Path.Combine(directory, filePath);
             }
 
+            // This is for explicit file paths that are double rooted:
+            //   media/tshoot-connect-attribute-not-syncing/tshoot-connect-attribute-not-syncing/syncingprocess.png
+            if (filePath.Contains("/"))
+            {
+                var combined = Path.Combine(directory, filePath);
+                if (File.Exists(combined))
+                {
+                    return combined;
+                }
+            }
+
             var directorySegments = directory.Split(Path.DirectorySeparatorChar);
             var pathSegments = filePath.Replace('/', Path.DirectorySeparatorChar).Split(Path.DirectorySeparatorChar);
             var segments = new HashSet<string>(StringComparer.OrdinalIgnoreCase);

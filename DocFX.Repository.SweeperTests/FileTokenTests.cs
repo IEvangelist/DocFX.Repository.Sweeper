@@ -11,15 +11,17 @@ namespace DocFX.Repository.SweeperTests
     public class FileTokenTests
     {
         // Uncomment to do explicit testing of actual files.
-        // [Fact]
+        //[Fact]
         //public async Task TestExplicitFileAsync()
         //{
-        //    var dir = @"C:\Repos\azure-docs-pr\articles\active-directory-b2c";
-        //    var token = new FileToken(new FileInfo($"{dir}\\index.yml"));
+        //    var dir = @"C:\Repos\azure-docs-pr\articles\active-directory";
+        //    var token = new FileToken(new FileInfo($"{dir}\\hybrid\\tshoot-connect-attribute-not-syncing.md"));
         //    await token.InitializeAsync(new Options
         //    {
         //        SourceDirectory = dir
         //    });
+
+        //    Assert.NotNull(token);
         //}
 
         [Fact]
