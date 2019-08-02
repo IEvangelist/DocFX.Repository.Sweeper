@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DocFX.Repository.Sweeper.OpenPublishing;
@@ -222,6 +223,27 @@ namespace DocFX.Repository.Sweeper.Core
 
             value = SplitOn(value, "#");
             return SplitOn(value, "?");
+        }
+
+        internal string GetUnrecognizedCodeFenceWarnings()
+        {
+            if (!ContainsInvalidCodeFenceSlugs)
+            {
+                return null;
+            }
+
+            var builder = new StringBuilder(FilePath);
+            if (Header.HasValue)
+            {
+                builder.AppendLine($"{Header}");
+            }
+            builder.AppendLine($"    Has {UnrecognizedCodeFenceSlugs.Count():#,#} unrecognized code fence slugs.");
+            foreach (var (line, slug) in UnrecognizedCodeFenceSlugs)
+            {
+                builder.AppendLine($"    line number {line:#,#} has {slug}");
+            }
+
+            return builder.ToString();
         }
     }
 }

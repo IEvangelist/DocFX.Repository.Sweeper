@@ -74,7 +74,7 @@ namespace DocFX.Repository.Sweeper.Core
                         tokens.OrderBy(token => token.FilePath),
                         (token, state) =>
                         {
-                            var relative = directory.MakeRelativeUri(new Uri(token.FilePath));
+                            var relative = directory.ToRelativePath(token.FilePath);
                             progressBar.Tick($"{type} files...{relative}");
 
                             if (IsTokenReferencedAnywhere(token, allTokensInMap))
@@ -115,6 +115,11 @@ namespace DocFX.Repository.Sweeper.Core
                 await HandleOrphanedFilesAsync(orphanedTopics, FileType.Markdown, options);
             }
 
+            if (options.OutputWarnings && tokenMap.ContainsKey(FileType.Markdown))
+            {
+                await WriteMarkdownWarningsAsync(tokenMap);
+            }
+
             if (options.FindOrphanedImages)
             {
                 await HandleOrphanedFilesAsync(orphanedImages, FileType.Image, options);
@@ -128,7 +133,20 @@ namespace DocFX.Repository.Sweeper.Core
             };
         }
 
-        static bool IsTokenWithinScopedDirectory(FileToken token, string sourceDir) 
+        static async Task WriteMarkdownWarningsAsync(IDictionary<FileType, IList<FileToken>> tokenMap)
+        {
+            using (var writer = new StreamWriter("warning.txt"))
+            {
+                foreach (var warning in
+                    tokenMap[FileType.Markdown].Where(md => md.ContainsInvalidCodeFenceSlugs)
+                                               .Select(md => md.GetUnrecognizedCodeFenceWarnings()))
+                {
+                    await writer.WriteLineAsync(warning);
+                }
+            }
+        }
+
+        static bool IsTokenWithinScopedDirectory(FileToken token, string sourceDir)
             => token?.FilePath?.IndexOf(sourceDir, StringComparison.OrdinalIgnoreCase) != -1;
 
         static bool IsTokenReferencedAnywhere(FileToken fileToken, IEnumerable<FileToken> tokens)

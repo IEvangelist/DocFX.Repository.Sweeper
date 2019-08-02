@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace DocFX.Repository.Sweeper.OpenPublishing
@@ -25,6 +26,32 @@ namespace DocFX.Repository.Sweeper.OpenPublishing
         bool IsParsed
             => !string.IsNullOrWhiteSpace(GitHubAuthor)
             && !string.IsNullOrWhiteSpace(MicrosoftAuthor);
+
+        public override string ToString()
+        {
+            if (IsParsed)
+            {
+                var builder = new StringBuilder();
+                if (!string.IsNullOrWhiteSpace(GitHubAuthor))
+                {
+                    builder.Append($"GitHub: {GitHubAuthor}");
+                }
+                if (!string.IsNullOrWhiteSpace(MicrosoftAuthor))
+                {
+                    builder.Append($"MS Alias: {MicrosoftAuthor}");
+                }
+                if (!string.IsNullOrWhiteSpace(Manager))
+                {
+                    builder.Append($"Manager: {Manager}");
+                }
+                if (Date.HasValue)
+                {
+                    builder.Append($"Date: {Date}");
+                }
+            }
+
+            return string.Empty;
+        }
 
         public static bool TryParse(IEnumerable<string> lines, out Metadata metadata)
         {
