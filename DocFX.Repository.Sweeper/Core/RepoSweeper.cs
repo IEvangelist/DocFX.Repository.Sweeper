@@ -19,11 +19,7 @@ namespace DocFX.Repository.Sweeper.Core
             var orphanedImages = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var orphanedTopics = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            var directoryStringLength = options.SourceDirectory.Length;
-            var directory = options.DirectoryUri;
-
-            Console.WriteLine();
-            ConsoleColor.Green.WriteLine($"Searching \"{options.SourceDirectory}\" for orphaned files.");
+            ConsoleColor.Green.WriteLine($"\nSearching \"{options.SourceDirectory}\" for orphaned files.");
 
             var (status, tokenMap) = await _fileTokenizer.TokenizeAsync(options);
             if (status == Status.Error)
@@ -36,27 +32,26 @@ namespace DocFX.Repository.Sweeper.Core
             Console.WriteLine($"Spent {stopwatch.Elapsed.ToHumanReadableString()} tokenizing files.");
             Console.WriteLine();
 
+            var directory = options.DirectoryUri;
             var typeStopwatch = new Stopwatch();
+
             foreach (var type in
                 tokenMap.Keys
                         .Where(IsRelevantToken)
                         .OrderBy(type => type))
             {
-                if (type == FileType.Image && !options.FindOrphanedImages)
+                if (type == FileType.Image && !options.FindOrphanedImages ||
+                    type == FileType.Markdown && !options.FindOrphanedTopics)
                 {
                     continue;
                 }
-                if (type == FileType.Markdown && !options.FindOrphanedTopics)
-                {
-                    continue;
-                }
-
-                var allTokens = tokenMap[type];
 
                 typeStopwatch.Restart();
 
+                var allTokens = tokenMap[type];
                 var tokens = allTokens.Where(token => token.IsRelevant);
                 var count = 0;
+
                 Spinner.Start($"Scoping \"{type}\" file workload.", spinner =>
                 {
                     spinner.Color = ConsoleColor.Blue;
@@ -64,7 +59,7 @@ namespace DocFX.Repository.Sweeper.Core
                     spinner.Succeed();
                 }, Patterns.Arc);
 
-                type.WriteLine($"Processing \"{type}\" files.");
+                type.WriteLine($"Evaluating \"{type}\" files. Scanning for cross references through-out the entire DocFx doc set.");
 
                 using (var progressBar =
                     new ProgressBar(
@@ -187,6 +182,10 @@ namespace DocFX.Repository.Sweeper.Core
                 }
 
                 Console.WriteLine();
+            }
+            else
+            {
+                type.WriteLine($"Wow, awesome! There are zero orphaned {type} files...");
             }
         }
     }

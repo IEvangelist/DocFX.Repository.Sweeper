@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -9,16 +10,22 @@ namespace DocFX.Repository.Sweeper.OpenPublishing
         static readonly RegexOptions Options =
             RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.ExplicitCapture;
 
-        internal static readonly Regex GitHubAuthorRegex =
-            new Regex(@"\Aauthor:\s*\b(?'author'.+?)\b", Options);
-
-        internal static readonly Regex MicrosoftAuthorRegex =
-            new Regex(@"ms.author:\s*\b(?'author'.+?)\b", Options);
+        static readonly Regex GitHubAuthorRegex = new Regex(@"\Aauthor:\s*\b(?'author'.+?)\b", Options);
+        static readonly Regex MicrosoftAuthorRegex = new Regex(@"ms.author:\s*\b(?'author'.+?)\b", Options);
+        static readonly Regex ManagerRegex = new Regex(@"\Amanager:\s*\b(?'manager'.+?)\b", Options);
+        static readonly Regex DateTimeRegex = new Regex(@"ms.date:\s*\b(?'date'.+?)$", Options);
 
         public string GitHubAuthor;
         public string MicrosoftAuthor;
+        public string Manager;
+        public DateTime? Date;
 
-        bool IsParsed => !string.IsNullOrWhiteSpace(GitHubAuthor) && !string.IsNullOrWhiteSpace(MicrosoftAuthor);
+        delegate void OnValueParsed(ref Metadata metadata, string value);
+
+        bool IsParsed
+            => !string.IsNullOrWhiteSpace(GitHubAuthor)
+            && !string.IsNullOrWhiteSpace(MicrosoftAuthor)
+            && !string.IsNullOrWhiteSpace(Manager);
 
         public static bool TryParse(IEnumerable<string> lines, out Metadata metadata)
         {
@@ -38,23 +45,46 @@ namespace DocFX.Repository.Sweeper.OpenPublishing
                 lines?.Where(line => !string.IsNullOrWhiteSpace(line))
                       .TakeWhile(ParsingMetadata) ?? Enumerable.Empty<string>())
             {
-                if (TryFindAuthor(GitHubAuthorRegex, line, out var gitHubAuthor))
+                if (TryFindNamedGroupValue(ref metadata, GitHubAuthorRegex, line, "author", delegate(ref Metadata md, string author) { md.GitHubAuthor = author; }))
                 {
-                    metadata.GitHubAuthor = gitHubAuthor;
+                    continue;
                 }
-                if (TryFindAuthor(MicrosoftAuthorRegex, line, out var microsoftAuthor))
+                if (TryFindNamedGroupValue(ref metadata, MicrosoftAuthorRegex, line, "author", delegate (ref Metadata md, string author) { md.MicrosoftAuthor = author; }))
                 {
-                    metadata.MicrosoftAuthor = microsoftAuthor;
+                    continue;
+                }
+                if (TryFindNamedGroupValue(ref metadata, ManagerRegex, line, "manager", delegate (ref Metadata md, string manager) { md.Manager = manager; }))
+                {
+                    continue;
+                }
+                if (TryFindNamedGroupValue(ref metadata, DateTimeRegex, line, "date", delegate(ref Metadata md, string date) 
+                {
+                    if (DateTime.TryParse(date, out var dateTime))
+                    {
+                        md.Date = dateTime;
+                    }
+                }))
+                {
+                    continue;
                 }
             }
 
             return metadata.IsParsed;
         }
 
-        static bool TryFindAuthor(Regex regex, string line, out string author)
+        static bool TryFindNamedGroupValue(
+            ref Metadata metadata,
+            Regex regex, 
+            string line, 
+            string groupName,
+            OnValueParsed onValueParsed)
         {
             var match = regex.Match(line);
-            author = match.Success ? match.Groups["author"].Value : null;
+            if (match.Success && match.Groups.Any(grp => grp.Name == groupName))
+            {
+                onValueParsed(ref metadata, match.Groups[groupName].Value);
+            }
+
             return match.Success;
         }
     }

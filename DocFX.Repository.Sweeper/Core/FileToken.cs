@@ -109,7 +109,7 @@ namespace DocFX.Repository.Sweeper.Core
             }
 
             foreach (var (tokenType, tokenValue, lineNumber) in
-                lines.SelectMany((line, lineNumber) => FindAllTokensInLine(line, lineNumber + 1, FileTypeUtils.MapExpressions(type)))
+                lines.SelectMany((line, lineNumber) => FindAllTokensInLine(line, lineNumber + 1, TokenExpressions.FileTypeToExpressionMap[type]))
                      .Where(tuple => !string.IsNullOrEmpty(tuple.Item2)))
             {
                 if (tokenType == TokenType.CodeFence)
