@@ -67,6 +67,18 @@ Here is an example output:
 
 ![Example output](example-output.png)
 
+### A word on `explicit` mode
+
+When using explicit mode (`-e` or `--explicitScope`), the sweeper tool will only consider files within the source directory provided. If any orphans are found, it will broaden the scope accordingly to re-attempt the sweep. This is a builtin safetly mechenism. Standard runs are much longer, but they validate more and are safer - they help to avoid incorrect deletions.
+
+#### Explicit
+
+![Explicit output](explicit-mode.png)
+
+#### Standard
+
+![Standard output](standard-mode.png)
+
 ## :poop: Toubleshooting
 
 ```

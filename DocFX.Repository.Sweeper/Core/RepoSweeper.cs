@@ -16,6 +16,7 @@ namespace DocFX.Repository.Sweeper.Core
 
         public async Task<SweepSummary> SweepAsync(Options options, Stopwatch stopwatch)
         {
+            broaden:
             var orphanedImages = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var orphanedTopics = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -32,7 +33,6 @@ namespace DocFX.Repository.Sweeper.Core
             Console.WriteLine($"Spent {stopwatch.Elapsed.ToHumanReadableString()} tokenizing files.");
             Console.WriteLine();
 
-            var directory = options.DirectoryUri;
             var typeStopwatch = new Stopwatch();
 
             foreach (var type in
@@ -59,7 +59,8 @@ namespace DocFX.Repository.Sweeper.Core
                     spinner.Succeed();
                 }, Patterns.Arc);
 
-                type.WriteLine($"Evaluating \"{type}\" files. Scanning for cross references throughout the entire DocFx doc set.");
+                var scopedOrEntire = options.ExplicitScope ? "scoped" : "entire";
+                type.WriteLine($"Evaluating \"{type}\" files. Scanning for cross references throughout the {scopedOrEntire} DocFx doc set.");
 
                 using (var progressBar =
                     new ProgressBar(
@@ -74,8 +75,8 @@ namespace DocFX.Repository.Sweeper.Core
                         tokens.OrderBy(token => token.FilePath),
                         (token, state) =>
                         {
-                            var relative = directory.ToRelativePath(token.FilePath);
-                            progressBar.Tick($"{type} files...{relative}");
+                            var relative = options.DirectoryUri.ToRelativePath(token.FilePath);
+                            progressBar.Tick($"{type} files: {relative}");
 
                             if (IsTokenReferencedAnywhere(token, allTokensInMap))
                             {
@@ -119,7 +120,7 @@ namespace DocFX.Repository.Sweeper.Core
                     options.FindOrphanedImages && orphanedImages.Count > 0)
                 {
                     options.ExplicitScope = false;
-                    await SweepAsync(options, stopwatch);
+                    goto broaden; // Ugh, a goto... really?!
                 }
             }
 
@@ -191,6 +192,7 @@ namespace DocFX.Repository.Sweeper.Core
                 foreach (var (ext, count) in
                     files.Select(file => Path.GetExtension(file).ToUpper())
                          .GroupBy(ext => ext)
+                         .OrderBy(grp => grp.Key)
                          .Select(grp => (grp.Key, grp.Count())))
                 {
                     type.WriteLine($"    {count:#,#} ({ext}) files");
