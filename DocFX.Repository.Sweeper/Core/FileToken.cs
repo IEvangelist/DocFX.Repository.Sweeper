@@ -49,7 +49,7 @@ namespace DocFX.Repository.Sweeper.Core
         public IEnumerable<(int, string)> UnrecognizedCodeFenceSlugs
             => _codeFenceSlugs is null
                 ? Enumerable.Empty<(int, string)>()
-                : _codeFenceSlugs.Where(kvp => !Taxonomies.Aliases.Contains(kvp.Value))
+                : _codeFenceSlugs.Where(kvp => !Taxonomies.UniqueMonikers.Contains(kvp.Value))
                                  .Select(kvp => (kvp.Key, kvp.Value));
 
         public bool ContainsInvalidCodeFenceSlugs => UnrecognizedCodeFenceSlugs.Any();

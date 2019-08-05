@@ -25,7 +25,7 @@ namespace DocFX.Repository.Sweeper.OpenPublishing
 
         bool IsParsed
             => !string.IsNullOrWhiteSpace(GitHubAuthor)
-            && !string.IsNullOrWhiteSpace(MicrosoftAuthor);
+            || !string.IsNullOrWhiteSpace(MicrosoftAuthor);
 
         public override string ToString()
         {

@@ -5,8 +5,28 @@ namespace DocFX.Repository.Sweeper.OpenPublishing
 {
     public class Taxonomies
     {
+        private static ISet<string> _uniqueMonikers;
+
+        public static ISet<string> UniqueMonikers
+        {
+            get
+            {
+                if (_uniqueMonikers != null)
+                {
+                    return _uniqueMonikers;
+                }
+                else
+                {
+                    _uniqueMonikers = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    _uniqueMonikers.UnionWith(Aliases);
+                    _uniqueMonikers.UnionWith(Languages.Keys);
+                    return _uniqueMonikers;
+                }
+            }
+        }
+
         // https://review.docs.microsoft.com/en-us/new-hope/information-architecture/metadata/taxonomies?branch=master#dev-lang
-        public static IDictionary<string, Taxonomy> Languages { get; } =
+        static IDictionary<string, Taxonomy> Languages { get; } =
             new Dictionary<string, Taxonomy>(StringComparer.OrdinalIgnoreCase)
             {
                 ["aspx"] = new Taxonomy("aspx", "ASP.NET"),
@@ -60,7 +80,7 @@ namespace DocFX.Repository.Sweeper.OpenPublishing
                 ["yaml"] = new Taxonomy("yaml", "YAML")
             };
 
-        public static ISet<string> Aliases = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        static ISet<string> Aliases = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
             "1c",
             "abnf",
