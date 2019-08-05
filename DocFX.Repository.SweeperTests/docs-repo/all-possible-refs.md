@@ -1,7 +1,7 @@
 ---
 title: Testing
 description: This is just a test
-author: IEvangelist
+author: i-Evangelist
 manager: nitinme
 ms.topic: conceptual
 ms.date: 7/17/2019

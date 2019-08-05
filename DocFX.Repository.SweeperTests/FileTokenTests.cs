@@ -14,8 +14,8 @@ namespace DocFX.Repository.SweeperTests
         //[Fact]
         //public async Task TestExplicitFileAsync()
         //{
-        //    var dir = @"C:\Repos\azure-docs-pr\articles\active-directory";
-        //    var token = new FileToken(new FileInfo($"{dir}\\hybrid\\tshoot-connect-attribute-not-syncing.md"));
+        //    var dir = @"C:\Repos\azure-docs-pr\articles\avere-vfxt";
+        //    var token = new FileToken(new FileInfo($"{dir}\\avere-vfxt-configure-dns.md"));
         //    await token.InitializeAsync(new Options
         //    {
         //        SourceDirectory = dir
@@ -60,7 +60,7 @@ namespace DocFX.Repository.SweeperTests
             // Check header metadata
             Assert.NotNull(token.Header);
             Assert.Equal("dapine", token.Header.Value.MicrosoftAuthor);
-            Assert.Equal("IEvangelist", token.Header.Value.GitHubAuthor);
+            Assert.Equal("i-Evangelist", token.Header.Value.GitHubAuthor);
 
             
 

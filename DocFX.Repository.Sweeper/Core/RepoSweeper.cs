@@ -59,7 +59,7 @@ namespace DocFX.Repository.Sweeper.Core
                     spinner.Succeed();
                 }, Patterns.Arc);
 
-                var scopedOrEntire = options.ExplicitScope ? "scoped" : "entire";
+                var scopedOrEntire = options.ExplicitScope ? "explicitly scoped" : "entire";
                 type.WriteLine($"Evaluating \"{type}\" files. Scanning for cross references throughout the {scopedOrEntire} DocFx doc set.");
 
                 using (var progressBar =

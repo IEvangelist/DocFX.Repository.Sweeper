@@ -10,9 +10,9 @@ namespace DocFX.Repository.Sweeper.OpenPublishing
         static readonly RegexOptions Options =
             RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.ExplicitCapture;
 
-        static readonly Regex GitHubAuthorRegex = new Regex(@"\Aauthor:\s*\b(?'author'.+?)\b", Options);
-        static readonly Regex MicrosoftAuthorRegex = new Regex(@"ms.author:\s*\b(?'author'.+?)\b", Options);
-        static readonly Regex ManagerRegex = new Regex(@"\Amanager:\s*\b(?'manager'.+?)\b", Options);
+        static readonly Regex GitHubAuthorRegex = new Regex(@"\Aauthor:\s*\b(?'author'.+?)$", Options);
+        static readonly Regex MicrosoftAuthorRegex = new Regex(@"ms.author:\s*\b(?'author'.+?)$", Options);
+        static readonly Regex ManagerRegex = new Regex(@"\Amanager:\s*\b(?'manager'.+?)$", Options);
         static readonly Regex DateTimeRegex = new Regex(@"ms.date:\s*\b(?'date'.+?)$", Options);
 
         public string GitHubAuthor;
