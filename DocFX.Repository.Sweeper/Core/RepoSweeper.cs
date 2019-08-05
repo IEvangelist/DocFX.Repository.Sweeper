@@ -135,7 +135,8 @@ namespace DocFX.Repository.Sweeper.Core
 
         static async Task WriteMarkdownWarningsAsync(IDictionary<FileType, IList<FileToken>> tokenMap)
         {
-            using (var writer = new StreamWriter("warning.txt"))
+            var path = Path.GetFullPath("warning.txt");
+            using (var writer = new StreamWriter(path))
             {
                 foreach (var warning in
                     tokenMap[FileType.Markdown].Where(md => md.ContainsInvalidCodeFenceSlugs)
@@ -143,6 +144,8 @@ namespace DocFX.Repository.Sweeper.Core
                 {
                     await writer.WriteLineAsync(warning);
                 }
+
+                ConsoleColor.DarkMagenta.WriteLine($"Warnings written to: {path}");
             }
         }
 

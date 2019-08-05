@@ -65,10 +65,10 @@ namespace DocFX.Repository.SweeperTests
             // Check code fence slugs
             Assert.True(token.ContainsInvalidCodeFenceSlugs);
             Assert.Contains(new KeyValuePair<int, string>(33, "csharp"), token.CodeFenceSlugs);
-            Assert.Contains(new KeyValuePair<int, string>(40, "c#"), token.CodeFenceSlugs);
+            Assert.Contains(new KeyValuePair<int, string>(40, "c#"), token.CodeFenceSlugs); // Invalid code fence slug
             Assert.Contains(new KeyValuePair<int, string>(44, "js"), token.CodeFenceSlugs);
             Assert.Contains(new KeyValuePair<int, string>(52, "javascript"), token.CodeFenceSlugs);
-            Assert.Equal(2, token.UnrecognizedCodeFenceSlugs.Count());
+            Assert.Single(token.UnrecognizedCodeFenceSlugs);
 
             // Check references to images and other markdown files
             foreach (var otherToken in expectedTokens)

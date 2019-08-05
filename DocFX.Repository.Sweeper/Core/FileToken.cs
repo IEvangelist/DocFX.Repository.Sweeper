@@ -49,7 +49,7 @@ namespace DocFX.Repository.Sweeper.Core
         public IEnumerable<(int, string)> UnrecognizedCodeFenceSlugs
             => _codeFenceSlugs is null
                 ? Enumerable.Empty<(int, string)>()
-                : _codeFenceSlugs.Where(kvp => !Taxonomies.Languages.ContainsKey(kvp.Value))
+                : _codeFenceSlugs.Where(kvp => !Taxonomies.Aliases.Contains(kvp.Value))
                                  .Select(kvp => (kvp.Key, kvp.Value));
 
         public bool ContainsInvalidCodeFenceSlugs => UnrecognizedCodeFenceSlugs.Any();
@@ -235,7 +235,7 @@ namespace DocFX.Repository.Sweeper.Core
             var builder = new StringBuilder(FilePath);
             if (Header.HasValue)
             {
-                builder.AppendLine($"{Header}");
+                builder.AppendLine($"{Header.ToString()}");
             }
             builder.AppendLine($"    Has {UnrecognizedCodeFenceSlugs.Count():#,#} unrecognized code fence slugs.");
             foreach (var (line, slug) in UnrecognizedCodeFenceSlugs)
