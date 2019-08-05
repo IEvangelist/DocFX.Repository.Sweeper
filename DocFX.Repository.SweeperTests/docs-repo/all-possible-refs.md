@@ -57,6 +57,8 @@ This might be right?
 
 	![Ugh, so mad at people for doing this](https://docs.microsoft.com/azure/media/index/link.png)
 
+	![This is pretty lame too](/azure/media/index/linkage.png)
+
 
 ![but why](media/context/context/seriously-why.png)
 

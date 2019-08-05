@@ -9,6 +9,7 @@
   <ItemGroup>
     <None Remove="docs-repo\docfx.json" />
     <None Remove="docs-repo\media\context\context\seriously-why.png" />
+    <None Remove="docs-repo\media\index\linkage.png" />
     <None Remove="docs-repo\media\more.jpg" />
     <None Remove="docs-repo\media\serious - Copy.png" />
     <None Remove="docs-repo\ref-seven.md" />
@@ -27,6 +28,9 @@
 
   <ItemGroup>
     <Content Include="docs-repo\media\context\context\seriously-why.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="docs-repo\media\index\linkage.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="docs-repo\media\index\link.png">
