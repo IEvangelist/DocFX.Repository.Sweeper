@@ -62,6 +62,8 @@ namespace DocFX.Repository.SweeperTests
             Assert.Equal("dapine", token.Header.Value.MicrosoftAuthor);
             Assert.Equal("IEvangelist", token.Header.Value.GitHubAuthor);
 
+            
+
             // Check code fence slugs
             Assert.True(token.ContainsInvalidCodeFenceSlugs);
             Assert.Contains(new KeyValuePair<int, string>(33, "csharp"), token.CodeFenceSlugs);

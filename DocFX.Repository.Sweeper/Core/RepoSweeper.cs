@@ -110,6 +110,19 @@ namespace DocFX.Repository.Sweeper.Core
                 }
             }
 
+
+            // If the user attempts a quick delete pass, and there are deletions found.
+            // Broaden the sweep to ensure that we're not mistakenly deleting things...
+            if (options.ExplicitScope && options.Delete)
+            {
+                if (options.FindOrphanedTopics && orphanedTopics.Count > 0 ||
+                    options.FindOrphanedImages && orphanedImages.Count > 0)
+                {
+                    options.ExplicitScope = false;
+                    await SweepAsync(options, stopwatch);
+                }
+            }
+
             if (options.FindOrphanedTopics)
             {
                 await HandleOrphanedFilesAsync(orphanedTopics, FileType.Markdown, options);
@@ -140,6 +153,7 @@ namespace DocFX.Repository.Sweeper.Core
             {
                 foreach (var warning in
                     tokenMap[FileType.Markdown].Where(md => md.ContainsInvalidCodeFenceSlugs)
+                                               .OrderBy(md => md.FilePath)
                                                .Select(md => md.GetUnrecognizedCodeFenceWarnings()))
                 {
                     await writer.WriteLineAsync(warning);

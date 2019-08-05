@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace DocFX.Repository.Sweeper.OpenPublishing
@@ -25,32 +24,30 @@ namespace DocFX.Repository.Sweeper.OpenPublishing
 
         bool IsParsed
             => !string.IsNullOrWhiteSpace(GitHubAuthor)
-            || !string.IsNullOrWhiteSpace(MicrosoftAuthor);
+            && !string.IsNullOrWhiteSpace(MicrosoftAuthor);
 
         public override string ToString()
         {
-            if (IsParsed)
+            var details = new List<string>();
+            if (!string.IsNullOrWhiteSpace(GitHubAuthor))
             {
-                var builder = new StringBuilder();
-                if (!string.IsNullOrWhiteSpace(GitHubAuthor))
-                {
-                    builder.Append($"GitHub: {GitHubAuthor}");
-                }
-                if (!string.IsNullOrWhiteSpace(MicrosoftAuthor))
-                {
-                    builder.Append($"MS Alias: {MicrosoftAuthor}");
-                }
-                if (!string.IsNullOrWhiteSpace(Manager))
-                {
-                    builder.Append($"Manager: {Manager}");
-                }
-                if (Date.HasValue)
-                {
-                    builder.Append($"Date: {Date}");
-                }
+                details.Add($"https://github.com/{GitHubAuthor}");
+            }
+            if (!string.IsNullOrWhiteSpace(MicrosoftAuthor))
+            {
+                details.Add($"Microsoft Alias: {MicrosoftAuthor} (http://who/is/{MicrosoftAuthor})");
+            }
+            if (!string.IsNullOrWhiteSpace(Manager))
+            {
+                details.Add($"Manager: {Manager} (http://who/is/{Manager})");
+            }
+            var (hasValue, date) = Date;
+            if (hasValue)
+            {
+                details.Add($"Date: {date.ToShortDateString()}");
             }
 
-            return string.Empty;
+            return string.Join(", ", details);
         }
 
         public static bool TryParse(IEnumerable<string> lines, out Metadata metadata)

@@ -233,9 +233,10 @@ namespace DocFX.Repository.Sweeper.Core
             }
 
             var builder = new StringBuilder(FilePath);
-            if (Header.HasValue)
+            var (hasValue, header) = Header;
+            if (hasValue)
             {
-                builder.AppendLine($"{Header.ToString()}");
+                builder.AppendLine($"{Environment.NewLine}{header.ToString()}");
             }
             builder.AppendLine($"    Has {UnrecognizedCodeFenceSlugs.Count():#,#} unrecognized code fence slugs.");
             foreach (var (line, slug) in UnrecognizedCodeFenceSlugs)
