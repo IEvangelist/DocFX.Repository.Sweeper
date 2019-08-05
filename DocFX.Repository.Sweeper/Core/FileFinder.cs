@@ -27,31 +27,9 @@ namespace DocFX.Repository.Sweeper.Core
 
             try
             {
-                if (filePath.StartsWith("http", StringComparison.OrdinalIgnoreCase) &&
-                    FileExtensionInUrlRegex.IsMatch(filePath))
-                {
-                    if (_blackListedExtensions.Contains(Path.GetExtension(filePath)))
-                    {
-                        return (false, null);
-                    }
-
-                    var config = await options.GetConfigAsync();
-                    var uri = new Uri(options.HostUri, $"{config.Build.Dest}/");
-                    if (filePath.StartsWith(uri.ToString(), StringComparison.OrdinalIgnoreCase))
-                    {
-                        filePath = filePath.Replace(uri.ToString(), "");
-                    }
-                    else if (filePath.StartsWith($"{options.HostUri}/", StringComparison.OrdinalIgnoreCase))
-                    {
-                        filePath = filePath.Replace($"{options.HostUri}/", "");
-                    }
-
-                    if (filePath.StartsWith("http", StringComparison.OrdinalIgnoreCase))
-                    {
-                        return (false, null);
-                    }
-                }
-                else if (filePath.IndexOfAny(InvalidPathCharacters) != -1)
+                filePath = await EnsureValidFilePathAsync(options, filePath);
+                if (string.IsNullOrWhiteSpace(filePath) ||
+                    filePath.IndexOfAny(InvalidPathCharacters) != -1)
                 {
                     return (false, null);
                 }
@@ -73,6 +51,44 @@ namespace DocFX.Repository.Sweeper.Core
             }
 
             return (false, null);
+        }
+
+        static async ValueTask<string> EnsureValidFilePathAsync(Options options, string filePath)
+        {
+            var config = await options.GetConfigAsync();
+            if (filePath.StartsWith("http", StringComparison.OrdinalIgnoreCase) &&
+                FileExtensionInUrlRegex.IsMatch(filePath))
+            {
+                if (_blackListedExtensions.Contains(Path.GetExtension(filePath)))
+                {
+                    return null;
+                }
+
+                var uri = new Uri(options.HostUri, $"{config.Build.Dest}/");
+                if (filePath.StartsWith(uri.ToString(), StringComparison.OrdinalIgnoreCase))
+                {
+                    filePath = filePath.Replace(uri.ToString(), "");
+                }
+                else if (filePath.StartsWith($"{options.HostUri}/", StringComparison.OrdinalIgnoreCase))
+                {
+                    filePath = filePath.Replace($"{options.HostUri}/", "");
+                }
+
+                if (filePath.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                {
+                    return null;
+                }
+            }
+            else if (filePath.StartsWith($"/{config.Build.Dest}/", StringComparison.OrdinalIgnoreCase))
+            {
+                return filePath.Replace($"/{config.Build.Dest}/", "");
+            }
+            else if (filePath.StartsWith($"{config.Build.Dest}/", StringComparison.OrdinalIgnoreCase))
+            {
+                return filePath.Replace($"{config.Build.Dest}/", "");
+            }
+
+            return filePath;
         }
     }
 }

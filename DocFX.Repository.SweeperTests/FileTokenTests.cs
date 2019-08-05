@@ -14,8 +14,8 @@ namespace DocFX.Repository.SweeperTests
         //[Fact]
         //public async Task TestExplicitFileAsync()
         //{
-        //    var dir = @"C:\Repos\azure-docs-pr\articles\avere-vfxt";
-        //    var token = new FileToken(new FileInfo($"{dir}\\avere-vfxt-configure-dns.md"));
+        //    var dir = @"C:\Repos\azure-docs-pr\articles\automation";
+        //    var token = new FileToken(new FileInfo($"{dir}\\index.yml"));
         //    await token.InitializeAsync(new Options
         //    {
         //        SourceDirectory = dir
