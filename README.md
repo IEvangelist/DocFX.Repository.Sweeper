@@ -69,7 +69,7 @@ Here is an example output:
 
 ### A word on `explicit` mode
 
-When using explicit mode (`-e` or `--explicitScope`), the sweeper tool will only consider files within the source directory provided. If any orphans are found, it will broaden the scope accordingly to re-attempt the sweep. This is a builtin safetly mechenism. Standard runs are much longer, but they validate more and are safer - they help to avoid incorrect deletions.
+When using explicit mode (`-e` or `--explicitScope`), the sweeper tool will only consider files within the source directory provided. If any orphans are found, it will broaden the scope to the entire DocFx doc set to re-attempt the sweep. This is a builtin safetly mechenism. Standard runs are much longer, but they validate more and are safer - they help to avoid incorrect deletions.
 
 #### Explicit
 
