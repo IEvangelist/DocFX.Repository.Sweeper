@@ -18,7 +18,7 @@ namespace DocFX.Repository.Sweeper.Core
         static readonly Regex MarkdownNestedParathesesRegex = new Regex(@"\](?:[^()]|(?<open>[(])|(?<content-open>[)]))*(?(open)(?!))", Options);
         static readonly Regex SrcLinkAttributeRegex = new Regex("src\\s*=\\s*\"(?'link'.+?)\"", ExplicitOptions);
         static readonly Regex HrefLinkAttributeRegex = new Regex("href\\s*=\\s*\"(?'link'.+?)\"", ExplicitOptions);
-        static readonly Regex CodeFenceRegex = new Regex(@"```(?'slug'.+?)(\z|\r\n])", ExplicitOptions);
+        static readonly Regex CodeFenceRegex = new Regex(@"```(?'slug'.*?[^```])\z|\r\n", ExplicitOptions);
         static readonly Regex YamlLinkRegex = new Regex(@"href:.+?(?'link'.*)", ExplicitOptions);
         static readonly Regex YamlSrcLinkRegex = new Regex(@"src:.+?(?'link'.*)", ExplicitOptions);
 

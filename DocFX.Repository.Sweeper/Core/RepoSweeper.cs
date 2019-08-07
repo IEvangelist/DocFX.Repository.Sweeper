@@ -14,9 +14,10 @@ namespace DocFX.Repository.Sweeper.Core
         readonly FileTokenizer _fileTokenizer = new FileTokenizer();
         readonly RedirectionAppender _redirectionAppender = new RedirectionAppender();
 
-        public async Task<SweepSummary> SweepAsync(Options options, Stopwatch stopwatch)
+        public async ValueTask<SweepSummary> SweepAsync(Options options, Stopwatch stopwatch)
         {
-            broaden:
+            broadenSweep:
+
             var orphanedImages = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var orphanedTopics = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -120,7 +121,7 @@ namespace DocFX.Repository.Sweeper.Core
                     options.FindOrphanedImages && orphanedImages.Count > 0)
                 {
                     options.ExplicitScope = false;
-                    goto broaden; // Ugh, a goto... really?!
+                    goto broadenSweep; // Ugh, a goto... really?!
                 }
             }
 
@@ -147,7 +148,7 @@ namespace DocFX.Repository.Sweeper.Core
             };
         }
 
-        static async Task WriteMarkdownWarningsAsync(IDictionary<FileType, IList<FileToken>> tokenMap)
+        static async ValueTask WriteMarkdownWarningsAsync(IDictionary<FileType, IList<FileToken>> tokenMap)
         {
             var path = Path.GetFullPath("warning.txt");
             using (var writer = new StreamWriter(path))
@@ -176,7 +177,7 @@ namespace DocFX.Repository.Sweeper.Core
         static bool IsRelevantToken(FileType fileType)
             => fileType != FileType.NotRelevant && fileType != FileType.Json;
 
-        async Task HandleOrphanedFilesAsync(ISet<string> files, FileType type, Options options)
+        async ValueTask HandleOrphanedFilesAsync(ISet<string> files, FileType type, Options options)
         {
             if (files.Any())
             {

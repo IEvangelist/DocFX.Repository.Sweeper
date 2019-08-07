@@ -25,16 +25,34 @@ namespace DocFX.Repository.SweeperTests
         //}
 
         [Fact]
+        public async Task ReadAndWriteProtoBufTest()
+        {
+            var dir = "docs-repo";
+            FileToken originalToken = new FileInfo($"{dir}/all-possible-refs.md");
+            await originalToken.InitializeAsync(new Options
+            {
+                IsUnitTest = true,
+                SourceDirectory = dir
+            });
+
+            originalToken.WriteToProtoBufFile("temporary.json");
+            var token = "temporary.json".ReadFromProtoBufFile<FileToken>();
+
+            AssertExpectations(dir, token);
+        }
+
+        [Fact]
         public async Task ReadsCorrectlyTest()
         {
             var dir = "docs-repo";
             FileToken originalToken = new FileInfo($"{dir}/all-possible-refs.md");
             await originalToken.InitializeAsync(new Options
             {
+                IsUnitTest = true,
                 SourceDirectory = dir
             });
 
-            var json = originalToken.ToJson();
+            var json = originalToken.ToJson(ObjectExtensions.MinifiedSettings);
             await File.WriteAllTextAsync("temporary.json", json);
             var token = (await File.ReadAllTextAsync("temporary.json")).FromJson<FileToken>();
 
@@ -48,6 +66,7 @@ namespace DocFX.Repository.SweeperTests
             FileToken token = new FileInfo($"{dir}/all-possible-refs.md");
             await token.InitializeAsync(new Options
             {
+                IsUnitTest = true,
                 SourceDirectory = dir
             });
 
@@ -81,9 +100,9 @@ namespace DocFX.Repository.SweeperTests
             };
 
             // Check header metadata
-            Assert.NotNull(token.Header);
-            Assert.Equal("dapine", token.Header.Value.MicrosoftAuthor);
-            Assert.Equal("i-Evangelist", token.Header.Value.GitHubAuthor);
+            Assert.NotEqual(default, token.Header);
+            Assert.Equal("dapine", token.Header.MicrosoftAuthor);
+            Assert.Equal("i-Evangelist", token.Header.GitHubAuthor);
 
             // Check code fence slugs
             Assert.True(token.ContainsInvalidCodeFenceSlugs);

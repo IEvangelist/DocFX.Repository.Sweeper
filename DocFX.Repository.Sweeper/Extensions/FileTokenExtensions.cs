@@ -6,59 +6,124 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
+using static System.Environment;
 
 namespace DocFX.Repository.Sweeper
 {
     public static class FileTokenExtensions
     {
+        static readonly string SweeperRoamingDir = Path.Combine(GetFolderPath(SpecialFolder.ApplicationData), "DocFx Sweeper");
+        static readonly string CacheDir = Path.Combine(SweeperRoamingDir, "Cache");
+
+        public static int CachedCount = 0;
+
         public static async ValueTask InitializeAsync(
             this FileToken token,
-            Options options)
+            Options options,
+            string destination = null)
         {
             if (token.FileType == FileType.Markdown ||
                 token.FileType == FileType.Yaml)
             {
-                var lines = await File.ReadAllLinesAsync(token.FilePath);
-                var dir = token.DirectoryName;
-                var type = token.FileType;
-
-                if (type == FileType.Markdown && Metadata.TryParse(lines, out var metadata))
+                var found = await TryFindCachedVersionAsync(token, options, destination);
+                if (!found)
                 {
-                    token.Header = metadata;
-                }
+                    var lines = await File.ReadAllLinesAsync(token.FilePath);
+                    var dir = token.DirectoryName;
+                    var type = token.FileType;
 
-                foreach (var (tokenType, tokenValue, lineNumber) in
-                    lines.SelectMany((line, lineNumber) => FindAllTokensInLine(line, lineNumber + 1, TokenExpressions.FileTypeToExpressionMap[type]))
-                         .Where(tuple => !string.IsNullOrEmpty(tuple.Item2)))
-                {
-                    if (tokenType == TokenType.CodeFence)
+                    if (type == FileType.Markdown && Metadata.TryParse(lines, out var metadata))
                     {
-                        token.CodeFenceSlugs[lineNumber] = tokenValue;
-                        continue;
+                        token.Header = metadata;
                     }
 
-                    if (tokenType == TokenType.Unrecognizable)
+                    foreach (var (tokenType, tokenValue, lineNumber) in
+                        lines.SelectMany((line, lineNumber) => FindAllTokensInLine(line, lineNumber + 1, TokenExpressions.FileTypeToExpressionMap[type]))
+                             .Where(tuple => !string.IsNullOrEmpty(tuple.Item2)))
                     {
-                        continue;
-                    }
-
-                    var (isFound, fullPath) = await FileFinder.TryFindFileAsync(options, dir, tokenValue);
-                    if (isFound && !string.IsNullOrWhiteSpace(fullPath))
-                    {
-                        var file = new FileInfo(fullPath.NormalizePathDelimitors());
-                        switch (file.GetFileType())
+                        if (tokenType == TokenType.CodeFence)
                         {
-                            case FileType.Image:
-                                token.ImagesReferenced.Add(file.FullName);
-                                break;
-                            case FileType.Markdown:
-                                token.TopicsReferenced.Add(file.FullName);
-                                break;
+                            token.CodeFenceSlugs[lineNumber] = tokenValue;
+                            continue;
+                        }
+
+                        if (tokenType == TokenType.Unrecognizable)
+                        {
+                            continue;
+                        }
+
+                        var (isFound, fullPath) = await FileFinder.TryFindFileAsync(options, dir, tokenValue);
+                        if (isFound && !string.IsNullOrWhiteSpace(fullPath))
+                        {
+                            var file = new FileInfo(fullPath.NormalizePathDelimitors());
+                            switch (file.GetFileType())
+                            {
+                                case FileType.Image:
+                                    token.ImagesReferenced.Add(file.FullName);
+                                    break;
+                                case FileType.Markdown:
+                                    token.TopicsReferenced.Add(file.FullName);
+                                    break;
+                            }
                         }
                     }
+
+                    await CacheTokenAsync(token, options, destination);
                 }
             }
+        }
+
+        static async ValueTask<bool> TryFindCachedVersionAsync(FileToken token, Options options, string destination)
+        {
+            try
+            {
+                if (options.IsUnitTest)
+                {
+                    return false;
+                }
+
+                var cachedTokenPath = await GetTokenCachePathAsync(token, options, destination);
+                if (File.Exists(cachedTokenPath))
+                {
+                    token.MergeWith(cachedTokenPath.ReadFromProtoBufFile<FileToken>());
+                    Interlocked.Increment(ref CachedCount);
+                    return true;
+                }
+            }
+            catch
+            {
+            }
+
+            return false;
+        }
+
+        static async ValueTask CacheTokenAsync(FileToken token, Options options, string destination)
+        {
+            try
+            {
+                token.WriteToProtoBufFile(await GetTokenCachePathAsync(token, options, destination));
+            }
+            catch
+            {
+            }
+        }
+
+        static async ValueTask<string> GetTokenCachePathAsync(FileToken token, Options options, string destination)
+        {
+            var dest =
+                string.IsNullOrWhiteSpace(destination)
+                    ? (await options.GetConfigAsync()).Build.Dest
+                    : destination;
+
+            var destDir = Path.Combine(CacheDir, dest);
+            if (!Directory.Exists(destDir))
+            {
+                Directory.CreateDirectory(destDir);
+            }
+
+            return Path.Combine(destDir, token.CachedJsonFileName);
         }
 
         static IEnumerable<(TokenType, string, int)> FindAllTokensInLine(
@@ -179,10 +244,9 @@ namespace DocFX.Repository.Sweeper
             }
 
             var builder = new StringBuilder(token.FilePath);
-            var (hasValue, header) = token.Header;
-            if (hasValue)
+            if (!token.Header.Equals(default))
             {
-                builder.AppendLine($"{Environment.NewLine}{header.ToString()}");
+                builder.AppendLine($"{Environment.NewLine}{token.Header.ToString()}");
             }
             builder.AppendLine($"    Has {token.UnrecognizedCodeFenceSlugs.Count():#,#} unrecognized code fence slugs.");
             foreach (var (line, slug) in token.UnrecognizedCodeFenceSlugs)

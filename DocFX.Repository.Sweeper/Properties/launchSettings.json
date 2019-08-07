@@ -2,7 +2,7 @@
   "profiles": {
     "DocFX.Repository.Sweeper": {
       "commandName": "Project",
-      "commandLineArgs": "-o --topics --directory \"C:\\Repos\\azure-docs-pr\\articles\\active-directory\""
+      "commandLineArgs": "-o -t -s \"C:\\Repos\\azure-docs-pr\\articles\""
     }
   }
 }

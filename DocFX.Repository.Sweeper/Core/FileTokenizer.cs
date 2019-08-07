@@ -11,7 +11,7 @@ namespace DocFX.Repository.Sweeper.Core
 {
     public class FileTokenizer
     {
-        public async Task<(Status, IDictionary<FileType, IList<FileToken>>)> TokenizeAsync(Options options)
+        public async ValueTask<(Status, IDictionary<FileType, IList<FileToken>>)> TokenizeAsync(Options options)
         {
             var dirUri = options.DirectoryUri;
             var dir =
@@ -37,6 +37,9 @@ namespace DocFX.Repository.Sweeper.Core
             }, Patterns.Arc);
             var map = new ConcurrentDictionary<FileType, IList<FileToken>>();
 
+            var config = await options.GetConfigAsync();
+            var destination = config.Build.Dest;
+
             using (var progressBar = new ProgressBar(count, "Tokenizing files..."))
             {
                 await dir.EnumerateFiles("*.*", SearchOption.AllDirectories)
@@ -47,7 +50,7 @@ namespace DocFX.Repository.Sweeper.Core
                         FileToken fileToken = fileInfo;
                         await fileToken.InitializeAsync(options);
 
-                        progressBar.Tick($"Tokenizing files...{dirUri.ToRelativePath(fileToken.FilePath)}");
+                        progressBar.Tick($"Materialzing file tokens...{dirUri.ToRelativePath(fileToken.FilePath)}");
                         if (map.TryGetValue(fileToken.FileType, out var tokens))
                         {
                             tokens.Add(fileToken);
@@ -57,7 +60,13 @@ namespace DocFX.Repository.Sweeper.Core
                             map[fileToken.FileType] = new List<FileToken> { fileToken };
                         }
                     });
-                progressBar.Tick("Finished tokenizing files...");
+                progressBar.Tick("Materialization complete...");
+            }
+
+            var cachedCount = FileTokenExtensions.CachedCount;
+            if (cachedCount > 0)
+            {
+                ConsoleColor.Green.WriteLine($"Materialized {cachedCount:#,#} file tokens from the local cache rather than re-reading and parsing them.");
             }
 
             return (Status.Success, map);

@@ -1,8 +1,11 @@
 ﻿using DocFX.Repository.Sweeper.Converters;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
+using System.IO;
 using YamlDotNet.Serialization;
 using static Newtonsoft.Json.JsonConvert;
+using ProtoBufSerializer = ProtoBuf.Serializer;
 
 namespace DocFX.Repository.Sweeper
 {
@@ -18,12 +21,45 @@ namespace DocFX.Repository.Sweeper
             ContractResolver = ContractResolver,
             Formatting = Formatting.Indented,
             NullValueHandling = NullValueHandling.Ignore,
-            MissingMemberHandling = MissingMemberHandling.Ignore,
-            Converters =
-            {
-                new MetadataConverter()
-            }
+            MissingMemberHandling = MissingMemberHandling.Ignore
         };
+
+        public static readonly JsonSerializerSettings MinifiedSettings = new JsonSerializerSettings
+        {
+            ContractResolver = ContractResolver,
+            Formatting = Formatting.None,
+            NullValueHandling = NullValueHandling.Ignore,
+            MissingMemberHandling = MissingMemberHandling.Ignore
+        };
+
+        static ObjectExtensions() => 
+            JsonConvert.DefaultSettings = 
+            () =>
+            {
+                DefaultSettings.Converters.Add(new MetadataConverter());
+                DefaultSettings.Converters.Add(new StringEnumConverter());
+
+                return DefaultSettings;
+            };
+
+        public static T ReadFromProtoBufFile<T>(this string path) where T : new()
+        {
+            T result;
+            using (var file = File.OpenRead(path))
+            {
+                result = ProtoBufSerializer.Deserialize<T>(file);
+            }
+
+            return result;
+        }
+
+        public static void WriteToProtoBufFile<T>(this T value, string path) where T : new()
+        {
+            using (var file = File.Create(path))
+            {
+                ProtoBufSerializer.Serialize(file, value);
+            }
+        }
 
         public static T FromJson<T>(this string json, JsonSerializerSettings serializerSettings = null)
             => string.IsNullOrWhiteSpace(json) ? default : DeserializeObject<T>(json, serializerSettings ?? DefaultSettings);

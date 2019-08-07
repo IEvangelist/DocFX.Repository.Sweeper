@@ -1,40 +1,56 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using DocFX.Repository.Sweeper.OpenPublishing;
 using Newtonsoft.Json;
+using ProtoBuf;
 
 namespace DocFX.Repository.Sweeper.Core
 {
+    [ProtoContract]
     public class FileToken
     {
         IDictionary<int, string> _codeFenceSlugs;
 
-        public Metadata? Header { get; internal set; }
+        [JsonProperty("h"), ProtoMember(1)]
+        public Metadata Header { get; set; }
 
+        [JsonProperty("d"), ProtoMember(2)]
         public string DirectoryName { get; internal set; }
 
+        [JsonProperty("fp"), ProtoMember(3)]
         public string FilePath { get; internal set; }
 
+        [JsonProperty("ft"), ProtoMember(4)]
         public FileType FileType { get; internal set; }
 
+        [JsonProperty("lwt"), ProtoMember(5)]
+        public DateTime LastWriteTime { get; internal set; }
+
+        [JsonProperty("t"), ProtoMember(6)]
         public ISet<string> TopicsReferenced { get; } = new HashSet<string>();
 
+        [JsonProperty("i"), ProtoMember(7)]
         public ISet<string> ImagesReferenced { get; } = new HashSet<string>();
 
+        [JsonProperty("c"), ProtoMember(8)]
         public IDictionary<int, string> CodeFenceSlugs => _codeFenceSlugs ?? (_codeFenceSlugs = new Dictionary<int, string>());
 
+        [JsonIgnore]
         public int TotalReferences => TopicsReferenced.Count + ImagesReferenced.Count;
 
+        [JsonIgnore]
         public bool IsRelevant => FileType != FileType.NotRelevant && FileType != FileType.Json;
 
+        [JsonIgnore]
         public bool IsMarkedForDeletion { get; internal set; }
 
         [JsonIgnore]
         public IEnumerable<(int, string)> UnrecognizedCodeFenceSlugs
             => _codeFenceSlugs is null
                 ? Enumerable.Empty<(int, string)>()
-                : _codeFenceSlugs.Where(kvp => !Taxonomies.UniqueMonikers.Contains(kvp.Value))
+                : _codeFenceSlugs.Where(kvp => !Taxonomies.UniqueMonikers.Contains(kvp.Value) && !kvp.Value.Contains("```"))
                                  .Select(kvp => (kvp.Key, kvp.Value));
 
         [JsonIgnore]
@@ -43,6 +59,7 @@ namespace DocFX.Repository.Sweeper.Core
         public static implicit operator FileToken(FileInfo fileInfo) =>
             new FileToken
             {
+                LastWriteTime = fileInfo.LastWriteTime,
                 DirectoryName = fileInfo.DirectoryName,
                 FilePath = fileInfo.FullName,
                 FileType = fileInfo.GetFileType()
@@ -65,5 +82,26 @@ namespace DocFX.Repository.Sweeper.Core
                     return "For all intents and purposes, this is a meaningless file.";
             }
         }
+
+        internal void MergeWith(FileToken fileToken)
+        {
+            if (fileToken is null)
+            {
+                return;
+            }
+
+            _codeFenceSlugs = fileToken.CodeFenceSlugs;
+            DirectoryName = fileToken.DirectoryName;
+            FilePath = fileToken.FilePath;
+            FileType = fileToken.FileType;
+            Header = fileToken.Header;
+            LastWriteTime = fileToken.LastWriteTime;
+            ImagesReferenced.UnionWith(fileToken.ImagesReferenced);
+            TopicsReferenced.UnionWith(fileToken.TopicsReferenced);
+        }
+
+        [JsonIgnore]
+        internal string CachedJsonFileName => 
+            $"cache.{FilePath.GetDeterministicHashCode()}.{LastWriteTime.ToString().GetDeterministicHashCode()}.bin";
     }
 }

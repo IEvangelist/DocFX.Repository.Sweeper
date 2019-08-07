@@ -19,7 +19,7 @@ namespace DocFX.Repository.Sweeper.Core
         static readonly IDictionary<string, bool> _validRedirectUrlCache =
             new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
 
-        internal async Task ApplyRedirectsAsync(IEnumerable<string> files, Options options)
+        internal async ValueTask ApplyRedirectsAsync(IEnumerable<string> files, Options options)
         {
             var redirectConfig = await options.GetRedirectConfigAsync();
             if (redirectConfig?.Redirections.Any() ?? false)
@@ -85,7 +85,7 @@ namespace DocFX.Repository.Sweeper.Core
             }
         }
 
-        static async Task<bool> IsValidRedirectPathAsync(string hostUrl, string redirectPath, string queryString)
+        static async ValueTask<bool> IsValidRedirectPathAsync(string hostUrl, string redirectPath, string queryString)
         {
             var redirectUrl = $"{hostUrl}{redirectPath}{queryString}";
             if (_validRedirectUrlCache.TryGetValue(redirectUrl, out var isValid) && isValid)
@@ -114,7 +114,7 @@ namespace DocFX.Repository.Sweeper.Core
             }
         }
 
-        static async Task SaveRedirectAsync(Options options, RedirectConfig redirectConfig, Dictionary<string, ISet<Redirect>> redirectMap)
+        static async ValueTask SaveRedirectAsync(Options options, RedirectConfig redirectConfig, Dictionary<string, ISet<Redirect>> redirectMap)
         {
             try
             {

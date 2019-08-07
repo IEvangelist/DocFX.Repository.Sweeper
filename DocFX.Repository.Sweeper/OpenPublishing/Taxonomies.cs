@@ -88,6 +88,7 @@ namespace DocFX.Repository.Sweeper.OpenPublishing
             {
                 "azurecli-interactive",
                 "azurepowershell-interactive",
+                "powershell-interactive",
                 "csharp-interactive"
             };
 

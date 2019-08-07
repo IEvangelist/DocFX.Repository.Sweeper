@@ -54,5 +54,7 @@ namespace DocFX.Repository.Sweeper
 
         [Option('q', "query", HelpText = "If 'redirects' is true, this is an optional query string to be applied to redirect validation.")]
         public string QueryString { get; set; }
+
+        public bool IsUnitTest { get; set; }
     }
 }
