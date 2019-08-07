@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using DocFX.Repository.Sweeper.Converters;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using YamlDotNet.Serialization;
 using static Newtonsoft.Json.JsonConvert;
@@ -17,7 +18,11 @@ namespace DocFX.Repository.Sweeper
             ContractResolver = ContractResolver,
             Formatting = Formatting.Indented,
             NullValueHandling = NullValueHandling.Ignore,
-            MissingMemberHandling = MissingMemberHandling.Ignore
+            MissingMemberHandling = MissingMemberHandling.Ignore,
+            Converters =
+            {
+                new MetadataConverter()
+            }
         };
 
         public static T FromJson<T>(this string json, JsonSerializerSettings serializerSettings = null)

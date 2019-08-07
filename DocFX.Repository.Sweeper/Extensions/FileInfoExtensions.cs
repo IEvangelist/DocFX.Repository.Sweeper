@@ -46,14 +46,15 @@ namespace DocFX.Repository.Sweeper
         private static bool IsMatchingFileType(this FileInfo file, ICollection<string> extensions) =>
             extensions?.Contains(file?.Extension) ?? false;
 
-        public static FileType GetFileType(this FileInfo file)
-        {
-            if (file.IsMarkdownFile()) return FileType.Markdown;
-            if (file.IsImageFile()) return FileType.Image;
-            if (file.IsYamlFile()) return FileType.Yaml;
-            if (file.IsJsonFile()) return FileType.Json;
-
-            return FileType.NotRelevant;
-        }
+        public static FileType GetFileType(this FileInfo file) =>
+            file.IsMarkdownFile()
+                ? FileType.Markdown
+                : file.IsImageFile()
+                    ? FileType.Image
+                    : file.IsYamlFile()
+                        ? FileType.Yaml 
+                        : file.IsJsonFile() 
+                            ? FileType.Json 
+                            : FileType.NotRelevant;
     }
 }

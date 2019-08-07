@@ -42,9 +42,9 @@ namespace DocFX.Repository.Sweeper.Core
                 await dir.EnumerateFiles("*.*", SearchOption.AllDirectories)
                          .ForEachAsync(
                     Environment.ProcessorCount,
-                    async file =>
+                    async fileInfo =>
                     {
-                        var fileToken = new FileToken(file);
+                        FileToken fileToken = fileInfo;
                         await fileToken.InitializeAsync(options);
 
                         progressBar.Tick($"Tokenizing files...{dirUri.ToRelativePath(fileToken.FilePath)}");
