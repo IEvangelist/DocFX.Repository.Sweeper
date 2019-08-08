@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -11,7 +13,7 @@ namespace DocFX.Repository.Sweeper.Core
         static readonly RegexOptions Options = RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture;
         static readonly Regex FileExtensionRegex = new Regex("(?'ext'\\.\\w+$)", Options);
         static readonly Regex FileExtensionInUrlRegex = new Regex(@"(?'ext'\.\w{3,4})$|\?", Options);
-        static readonly char[] InvalidPathCharacters = Path.GetInvalidPathChars();
+        static readonly char[] InvalidPathCharacters = new[] { '[', ']', ')', '(' }.Concat(Path.GetInvalidPathChars()).ToArray();
         static readonly ISet<string> _blackListedExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
             ".com", ".net", ".aspx", ".org", ".blog"
@@ -29,6 +31,7 @@ namespace DocFX.Repository.Sweeper.Core
             {
                 filePath = await EnsureValidFilePathAsync(options, filePath);
                 if (string.IsNullOrWhiteSpace(filePath) ||
+                    filePath.StartsWith("http", StringComparison.OrdinalIgnoreCase) ||
                     filePath.IndexOfAny(InvalidPathCharacters) != -1)
                 {
                     return (false, null);
@@ -46,8 +49,10 @@ namespace DocFX.Repository.Sweeper.Core
                     return (true, files[0].NormalizePathDelimitors());
                 }
             }
-            catch
+            catch (Exception ex) when (Debugger.IsAttached)
             {
+                Debug.WriteLine(ex);
+                Debugger.Break();
             }
 
             return (false, null);

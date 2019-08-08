@@ -63,7 +63,7 @@ namespace DocFX.Repository.Sweeper.Core
                 progressBar.Tick("Materialization complete...");
             }
 
-            var cachedCount = FileTokenExtensions.CachedCount;
+            var cachedCount = FileTokenCacheUtility.CachedCount;
             if (cachedCount > 0)
             {
                 ConsoleColor.Green.WriteLine($"Materialized {cachedCount:#,#} file tokens from the local cache rather than re-reading and parsing them.");

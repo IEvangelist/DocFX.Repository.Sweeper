@@ -2,7 +2,7 @@
   "profiles": {
     "DocFX.Repository.Sweeper": {
       "commandName": "Project",
-      "commandLineArgs": "-o -t -s \"C:\\Repos\\azure-docs-pr\\articles\""
+      "commandLineArgs": "-i -o -t -s \"C:\\Users\\dapine\\source\\repos\\AspNetCore.Docs\\aspnetcore\""
     }
   }
 }

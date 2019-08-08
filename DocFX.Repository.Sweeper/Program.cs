@@ -43,6 +43,8 @@ namespace DocFX.Repository.Sweeper
                     return Task.CompletedTask;
                 });
             }
+
+            FileTokenCacheUtility.PurgeCache();
         }
     }
 }

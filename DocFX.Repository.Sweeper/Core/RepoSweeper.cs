@@ -185,13 +185,15 @@ namespace DocFX.Repository.Sweeper.Core
 
                 IEnumerable<string> LimitFiles(ISet<string> values, Options opts)
                 {
-                    return values.OrderBy(fileName => fileName)
+                    return values.Where(fileName => !string.IsNullOrWhiteSpace(fileName))
+                                 .OrderBy(fileName => fileName)
                                  .TakeWhile((_, index) => opts.DeletionLimit == 0 || index < opts.DeletionLimit);
                 }
 
                 var workingFiles = LimitFiles(files, options);
                 foreach (var (ext, count) in
-                    files.Select(file => Path.GetExtension(file).ToUpper())
+                    files.Where(file => !string.IsNullOrWhiteSpace(file))
+                         .Select(file => Path.GetExtension(file).ToUpper())
                          .GroupBy(ext => ext)
                          .OrderBy(grp => grp.Key)
                          .Select(grp => (grp.Key, grp.Count())))

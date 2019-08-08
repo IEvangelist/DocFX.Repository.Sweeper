@@ -21,4 +21,8 @@
     <PackageReference Include="YamlDotNet" Version="6.1.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\DocFX.Repository.Extensions\DocFX.Repository.Extensions.csproj" />
+  </ItemGroup>
+
 </Project>

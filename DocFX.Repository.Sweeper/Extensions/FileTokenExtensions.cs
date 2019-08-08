@@ -6,19 +6,12 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
-using static System.Environment;
 
 namespace DocFX.Repository.Sweeper
 {
     public static class FileTokenExtensions
     {
-        static readonly string SweeperRoamingDir = Path.Combine(GetFolderPath(SpecialFolder.ApplicationData), "DocFx Sweeper");
-        static readonly string CacheDir = Path.Combine(SweeperRoamingDir, "Cache");
-
-        public static int CachedCount = 0;
-
         public static async ValueTask InitializeAsync(
             this FileToken token,
             Options options,
@@ -27,7 +20,7 @@ namespace DocFX.Repository.Sweeper
             if (token.FileType == FileType.Markdown ||
                 token.FileType == FileType.Yaml)
             {
-                var found = await TryFindCachedVersionAsync(token, options, destination);
+                var found = await FileTokenCacheUtility.TryFindCachedVersionAsync(token, options, destination);
                 if (!found)
                 {
                     var lines = await File.ReadAllLinesAsync(token.FilePath);
@@ -70,65 +63,14 @@ namespace DocFX.Repository.Sweeper
                         }
                     }
 
-                    await CacheTokenAsync(token, options, destination);
+                    await FileTokenCacheUtility.CacheTokenAsync(token, options, destination);
                 }
             }
-        }
-
-        static async ValueTask<bool> TryFindCachedVersionAsync(FileToken token, Options options, string destination)
-        {
-            try
-            {
-                if (options.IsUnitTest)
-                {
-                    return false;
-                }
-
-                var cachedTokenPath = await GetTokenCachePathAsync(token, options, destination);
-                if (File.Exists(cachedTokenPath))
-                {
-                    token.MergeWith(cachedTokenPath.ReadFromProtoBufFile<FileToken>());
-                    Interlocked.Increment(ref CachedCount);
-                    return true;
-                }
-            }
-            catch
-            {
-            }
-
-            return false;
-        }
-
-        static async ValueTask CacheTokenAsync(FileToken token, Options options, string destination)
-        {
-            try
-            {
-                token.WriteToProtoBufFile(await GetTokenCachePathAsync(token, options, destination));
-            }
-            catch
-            {
-            }
-        }
-
-        static async ValueTask<string> GetTokenCachePathAsync(FileToken token, Options options, string destination)
-        {
-            var dest =
-                string.IsNullOrWhiteSpace(destination)
-                    ? (await options.GetConfigAsync()).Build.Dest
-                    : destination;
-
-            var destDir = Path.Combine(CacheDir, dest);
-            if (!Directory.Exists(destDir))
-            {
-                Directory.CreateDirectory(destDir);
-            }
-
-            return Path.Combine(destDir, token.CachedJsonFileName);
         }
 
         static IEnumerable<(TokenType, string, int)> FindAllTokensInLine(
-            string line, 
-            int lineNumber, 
+            string line,
+            int lineNumber,
             IEnumerable<Regex> expressions)
         {
             IEnumerable<(TokenType, string)> GetMatchingValues(Match match)
