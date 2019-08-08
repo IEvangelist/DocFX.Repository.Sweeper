@@ -10,21 +10,21 @@ namespace DocFX.Repository.SweeperTests
 {
     public class FileTokenTests
     {
-        // Uncomment to do explicit testing of actual files.
-        [Fact]
-        public async Task TestExplicitFileAsync()
-        {
-            var dir = @"C:\Repos\azure-docs-pr\articles\active-directory\saas-apps";
-            FileToken token = new FileInfo($"{dir}\\adobe-creative-cloud-tutorial.md");
-            await token.InitializeAsync(new Options
-            {
-                EnableCaching = false,
-                SourceDirectory = dir
-            });
+        //// Uncomment to do explicit testing of actual files.
+        //[Fact]
+        //public async Task TestExplicitFileAsync()
+        //{
+        //    var dir = @"C:\Repos\azure-docs-pr\articles\active-directory\saas-apps";
+        //    FileToken token = new FileInfo($"{dir}\\adobe-creative-cloud-tutorial.md");
+        //    await token.InitializeAsync(new Options
+        //    {
+        //        EnableCaching = false,
+        //        SourceDirectory = dir
+        //    });
 
-            Assert.NotNull(token);
-            Assert.Equal(20, token.ImagesReferenced.Count);
-        }
+        //    Assert.NotNull(token);
+        //    Assert.Equal(20, token.ImagesReferenced.Count);
+        //}
 
         [Fact]
         public async Task ReadAndWriteProtoBufTest()
