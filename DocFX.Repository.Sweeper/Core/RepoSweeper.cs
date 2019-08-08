@@ -1,6 +1,7 @@
 ﻿using Kurukuru;
 using ShellProgressBar;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -18,8 +19,8 @@ namespace DocFX.Repository.Sweeper.Core
         {
             broadenSweep:
 
-            var orphanedImages = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            var orphanedTopics = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var orphanedImages = new ConcurrentDictionary<string, FileToken>(StringComparer.OrdinalIgnoreCase);
+            var orphanedTopics = new ConcurrentDictionary<string, FileToken>(StringComparer.OrdinalIgnoreCase);
 
             ConsoleColor.Green.WriteLine($"\nSearching \"{options.SourceDirectory}\" for orphaned files.");
 
@@ -92,14 +93,14 @@ namespace DocFX.Repository.Sweeper.Core
                             switch (token.FileType)
                             {
                                 case FileType.Markdown:
-                                    if (options.FindOrphanedTopics && orphanedTopics.Add(token.FilePath))
+                                    if (options.FindOrphanedTopics && orphanedTopics.TryAdd(token.FilePath, token))
                                     {
                                         token.IsMarkedForDeletion = options.Delete;
                                     }
                                     break;
 
                                 case FileType.Image:
-                                    if (options.FindOrphanedImages && orphanedImages.Add(token.FilePath))
+                                    if (options.FindOrphanedImages && orphanedImages.TryAdd(token.FilePath, token))
                                     {
                                         token.IsMarkedForDeletion = options.Delete;
                                     }
@@ -120,7 +121,7 @@ namespace DocFX.Repository.Sweeper.Core
                 if (options.FindOrphanedTopics && orphanedTopics.Count > 0 ||
                     options.FindOrphanedImages && orphanedImages.Count > 0)
                 {
-                    options.ExplicitScope = false;
+                    options.EnableCaching = options.ExplicitScope = false;
                     goto broadenSweep; // Ugh, a goto... really?!
                 }
             }
@@ -169,31 +170,21 @@ namespace DocFX.Repository.Sweeper.Core
             => token?.FilePath?.IndexOf(sourceDir, StringComparison.OrdinalIgnoreCase) != -1;
 
         static bool IsTokenReferencedAnywhere(FileToken fileToken, IEnumerable<FileToken> tokens)
-            => tokens.Where(token => token != fileToken)
-                     .Any(otherToken =>
-                         !otherToken.IsMarkedForDeletion &&
-                         otherToken.HasReferenceTo(fileToken));
+            => tokens.Where(token => !ReferenceEquals(token, fileToken))
+                     .Any(otherToken => otherToken.HasReferenceTo(fileToken));
 
         static bool IsRelevantToken(FileType fileType)
             => fileType != FileType.NotRelevant && fileType != FileType.Json;
 
-        async ValueTask HandleOrphanedFilesAsync(ISet<string> files, FileType type, Options options)
+        async ValueTask HandleOrphanedFilesAsync(IDictionary<string, FileToken> files, FileType type, Options options)
         {
             if (files.Any())
             {
                 type.WriteLine($"Found {files.Count:#,#} orphaned {type} files.");
 
-                IEnumerable<string> LimitFiles(ISet<string> values, Options opts)
-                {
-                    return values.Where(fileName => !string.IsNullOrWhiteSpace(fileName))
-                                 .OrderBy(fileName => fileName)
-                                 .TakeWhile((_, index) => opts.DeletionLimit == 0 || index < opts.DeletionLimit);
-                }
-
-                var workingFiles = LimitFiles(files, options);
                 foreach (var (ext, count) in
-                    files.Where(file => !string.IsNullOrWhiteSpace(file))
-                         .Select(file => Path.GetExtension(file).ToUpper())
+                    files.Where(kvp => !string.IsNullOrWhiteSpace(kvp.Key))
+                         .Select(kvp => Path.GetExtension(kvp.Key).ToUpper())
                          .GroupBy(ext => ext)
                          .OrderBy(grp => grp.Key)
                          .Select(grp => (grp.Key, grp.Count())))
@@ -203,22 +194,40 @@ namespace DocFX.Repository.Sweeper.Core
 
                 if (options.Delete)
                 {
+                    var deletedFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    foreach (var (file, token) in 
+                        files.Where(kvp => !string.IsNullOrWhiteSpace(kvp.Key))
+                             .Where(kvp => File.Exists(kvp.Key))
+                             .OrderBy(kvp => kvp.Key))
+                    {
+                        try
+                        {
+                            File.Delete(file);
+
+                            if (!File.Exists(file) && deletedFiles.Add(file))
+                            {
+                                if (options.OutputWarnings)
+                                {
+                                    type.WriteLine($"Deleted {file} - {token.Header.ToString()}.");
+                                }
+                            }
+
+                            if (options.DeletionLimit > 0 && deletedFiles.Count == options.DeletionLimit)
+                            {
+                                break;
+                            }
+                        }
+                        catch
+                        {
+                        }
+                    }
+
                     if (type == FileType.Markdown && options.ApplyRedirects)
                     {
-                        await _redirectionAppender.ApplyRedirectsAsync(workingFiles, options);
+                        await _redirectionAppender.ApplyRedirectsAsync(deletedFiles, options);
                     }
 
-                    foreach (var file in workingFiles.Where(File.Exists))
-                    {
-                        if (options.OutputWarnings)
-                        {
-                            type.WriteLine($"Deleting: {file}.");
-                        }
-
-                        File.Delete(file);
-                    }
-
-                    type.WriteLine($"Deleted {workingFiles.Count():#,#} {type} files.");
+                    type.WriteLine($"Deleted {deletedFiles.Count:#,#} {type} files.");
                 }
 
                 Console.WriteLine();

@@ -35,8 +35,8 @@ namespace DocFX.Repository.Sweeper.Core
                        .Count();
                 spinner.Succeed();
             }, Patterns.Arc);
-            var map = new ConcurrentDictionary<FileType, IList<FileToken>>();
 
+            var tokens = new ConcurrentBag<FileToken>();
             var config = await options.GetConfigAsync();
             var destination = config.Build.Dest;
 
@@ -50,15 +50,10 @@ namespace DocFX.Repository.Sweeper.Core
                         FileToken fileToken = fileInfo;
                         await fileToken.InitializeAsync(options);
 
-                        progressBar.Tick($"Materialzing file tokens...{dirUri.ToRelativePath(fileToken.FilePath)}");
-                        if (map.TryGetValue(fileToken.FileType, out var tokens))
-                        {
-                            tokens.Add(fileToken);
-                        }
-                        else
-                        {
-                            map[fileToken.FileType] = new List<FileToken> { fileToken };
-                        }
+                        var relyingOnCache = options.EnableCaching ? " (relying on cache)" : string.Empty;
+                        progressBar.Tick($"Materialzing file tokens{relyingOnCache}...{dirUri.ToRelativePath(fileToken.FilePath)}");
+
+                        tokens.Add(fileToken);
                     });
                 progressBar.Tick("Materialization complete...");
             }
@@ -69,7 +64,9 @@ namespace DocFX.Repository.Sweeper.Core
                 ConsoleColor.Green.WriteLine($"Materialized {cachedCount:#,#} file tokens from the local cache rather than re-reading and parsing them.");
             }
 
-            return (Status.Success, map);
+
+
+            return (Status.Success, tokens.GroupBy(t => t.FileType).ToDictionary(grp => grp.Key, grp => grp.ToList() as IList<FileToken>));
         }
     }
 }

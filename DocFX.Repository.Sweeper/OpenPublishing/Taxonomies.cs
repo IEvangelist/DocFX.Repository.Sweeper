@@ -20,6 +20,7 @@ namespace DocFX.Repository.Sweeper.OpenPublishing
                     _uniqueMonikers = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                     _uniqueMonikers.UnionWith(HighlightJsAliases);
                     _uniqueMonikers.UnionWith(SnippetInteractives);
+                    _uniqueMonikers.UnionWith(WhiteListed);
                     _uniqueMonikers.UnionWith(Languages.Keys);
 
                     return _uniqueMonikers;
@@ -374,6 +375,13 @@ namespace DocFX.Repository.Sweeper.OpenPublishing
                 "xq",
                 "zephir",
                 "zep"
+            };
+
+        // Not found anywhere, but manually verified that they do in fact render correctly on the browser.
+        static readonly ISet<string> WhiteListed =
+            new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                "yml"
             };
     }
 
