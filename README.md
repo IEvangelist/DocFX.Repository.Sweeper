@@ -54,6 +54,7 @@ The **sweeper** executable is a `.NET Core` project and can be executed from the
 | `-r` | If true, writes redirections of deleted files to `.openpublishing.redirection.json` | `false` |
 | `-h` | If 'redirects' is true, this is required and is the host where the docs site is hosted | `"https://docs.microsoft.com"` |
 | `-q` | If 'redirects' is true, this is an optional query string to be applied to redirect validation |
+| `-c` | If true, enables caching of file tokens (much faster sequential execution) |
 
 > <sup>*</sup> denotes a required option
 

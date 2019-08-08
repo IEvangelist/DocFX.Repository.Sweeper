@@ -18,7 +18,7 @@ namespace DocFX.Repository.SweeperTests
             FileToken token = new FileInfo($"{dir}\\adobe-creative-cloud-tutorial.md");
             await token.InitializeAsync(new Options
             {
-                IsUnitTest = true,
+                EnableCaching = false,
                 SourceDirectory = dir
             });
 
@@ -33,7 +33,7 @@ namespace DocFX.Repository.SweeperTests
             FileToken originalToken = new FileInfo($"{dir}/all-possible-refs.md");
             await originalToken.InitializeAsync(new Options
             {
-                IsUnitTest = true,
+                EnableCaching = false,
                 SourceDirectory = dir
             });
 
@@ -50,7 +50,7 @@ namespace DocFX.Repository.SweeperTests
             FileToken originalToken = new FileInfo($"{dir}/all-possible-refs.md");
             await originalToken.InitializeAsync(new Options
             {
-                IsUnitTest = true,
+                EnableCaching = false,
                 SourceDirectory = dir
             });
 
@@ -68,7 +68,7 @@ namespace DocFX.Repository.SweeperTests
             FileToken token = new FileInfo($"{dir}/all-possible-refs.md");
             await token.InitializeAsync(new Options
             {
-                IsUnitTest = true,
+                EnableCaching = false,
                 SourceDirectory = dir
             });
 

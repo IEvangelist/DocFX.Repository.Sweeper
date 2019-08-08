@@ -18,7 +18,7 @@ namespace DocFX.Repository.Sweeper.Core
         {
             try
             {
-                if (options.IsUnitTest)
+                if (!options.EnableCaching)
                 {
                     return false;
                 }
@@ -42,6 +42,11 @@ namespace DocFX.Repository.Sweeper.Core
         {
             try
             {
+                if (!options.EnableCaching)
+                {
+                    return;
+                }
+
                 token.WriteToProtoBufFile(await GetTokenCachePathAsync(token, options, destination));
             }
             catch
