@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace DocFX.Repository.Sweeper
+namespace DocFX.Repository.Extensions
 {
     // https://blogs.msdn.microsoft.com/pfxteam/2012/03/05/implementing-a-simple-foreachasync-part-2/
     public static class EnumerableExtensions
@@ -27,7 +27,7 @@ namespace DocFX.Repository.Sweeper
 
         public static void For<T>(this T[] array, Action<T, int> action)
         {
-            for (var i = 0; i < array.Length; ++ i)
+            for (var i = 0; i < array.Length; ++i)
             {
                 action(array[i], i);
             }

@@ -1,4 +1,5 @@
 ﻿using Kurukuru;
+using DocFX.Repository.Extensions;
 using ShellProgressBar;
 using System;
 using System.Collections.Concurrent;
@@ -113,7 +114,6 @@ namespace DocFX.Repository.Sweeper.Core
                 }
             }
 
-
             // If the user attempts a quick delete pass, and there are deletions found.
             // Broaden the sweep to ensure that we're not mistakenly deleting things...
             if (options.ExplicitScope && options.Delete)
@@ -122,7 +122,7 @@ namespace DocFX.Repository.Sweeper.Core
                     options.FindOrphanedImages && orphanedImages.Count > 0)
                 {
                     options.EnableCaching = options.ExplicitScope = false;
-                    goto broadenSweep; // Ugh, a goto... really?!
+                    goto broadenSweep; // Ugh, a goto... really - but can't go recursive 
                 }
             }
 

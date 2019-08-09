@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using DocFX.Repository.Extensions;
 using DocFX.Repository.Sweeper.OpenPublishing;
 using Newtonsoft.Json;
 using ProtoBuf;

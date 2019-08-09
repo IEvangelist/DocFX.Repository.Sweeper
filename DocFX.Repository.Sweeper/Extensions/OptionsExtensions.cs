@@ -1,4 +1,5 @@
-﻿using DocFX.Repository.Sweeper.OpenPublishing;
+﻿using DocFX.Repository.Extensions;
+using DocFX.Repository.Sweeper.OpenPublishing;
 using System.Threading.Tasks;
 
 namespace DocFX.Repository.Sweeper

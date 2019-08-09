@@ -1,10 +1,10 @@
 ﻿using System.IO;
 
-namespace DocFX.Repository.Sweeper
+namespace DocFX.Repository.Extensions
 {
-    static class DirectoryInfoExtensions
+    public static class DirectoryInfoExtensions
     {
-        internal static DirectoryInfo TraverseToFile(this DirectoryInfo directory, string filename)
+        public static DirectoryInfo TraverseToFile(this DirectoryInfo directory, string filename)
         {
             try
             {

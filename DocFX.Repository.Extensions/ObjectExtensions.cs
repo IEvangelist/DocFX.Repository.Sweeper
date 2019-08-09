@@ -1,13 +1,11 @@
-﻿using DocFX.Repository.Sweeper.Converters;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System.IO;
 using YamlDotNet.Serialization;
 using static Newtonsoft.Json.JsonConvert;
 using ProtoBufSerializer = ProtoBuf.Serializer;
 
-namespace DocFX.Repository.Sweeper
+namespace DocFX.Repository.Extensions
 {
     public static class ObjectExtensions
     {
@@ -31,16 +29,6 @@ namespace DocFX.Repository.Sweeper
             NullValueHandling = NullValueHandling.Ignore,
             MissingMemberHandling = MissingMemberHandling.Ignore
         };
-
-        static ObjectExtensions() => 
-            JsonConvert.DefaultSettings = 
-            () =>
-            {
-                DefaultSettings.Converters.Add(new MetadataConverter());
-                DefaultSettings.Converters.Add(new StringEnumConverter());
-
-                return DefaultSettings;
-            };
 
         public static T ReadFromProtoBufFile<T>(this string path) where T : new()
         {

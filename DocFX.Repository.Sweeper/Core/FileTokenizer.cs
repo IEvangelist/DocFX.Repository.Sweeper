@@ -1,4 +1,5 @@
 ﻿using Kurukuru;
+using DocFX.Repository.Extensions;
 using ShellProgressBar;
 using System;
 using System.Collections.Concurrent;

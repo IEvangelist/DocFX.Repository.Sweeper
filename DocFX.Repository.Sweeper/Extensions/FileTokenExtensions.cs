@@ -1,4 +1,5 @@
-﻿using DocFX.Repository.Sweeper.Core;
+﻿using DocFX.Repository.Extensions;
+using DocFX.Repository.Sweeper.Core;
 using DocFX.Repository.Sweeper.OpenPublishing;
 using System;
 using System.Collections.Generic;

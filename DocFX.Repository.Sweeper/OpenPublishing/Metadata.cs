@@ -1,5 +1,4 @@
-﻿using DocFX.Repository.Sweeper.Converters;
-using Newtonsoft.Json;
+﻿using DocFX.Repository.Extensions;
 using ProtoBuf;
 using System;
 using System.Collections.Generic;
@@ -8,7 +7,7 @@ using System.Text.RegularExpressions;
 
 namespace DocFX.Repository.Sweeper.OpenPublishing
 {
-    [JsonConverter(typeof(MetadataConverter)), ProtoContract]
+    [ProtoContract]
     public struct Metadata
     {
         static readonly RegexOptions Options =
@@ -19,16 +18,16 @@ namespace DocFX.Repository.Sweeper.OpenPublishing
         static readonly Regex ManagerRegex = new Regex(@"\Amanager:\s*\b(?'manager'.+?)$", Options);
         static readonly Regex DateTimeRegex = new Regex(@"ms.date:\s*\b(?'date'.+?)$", Options);
 
-        [JsonProperty("g"), ProtoMember(1)]
+        [ProtoMember(1)]
         public string GitHubAuthor;
 
-        [JsonProperty("m"), ProtoMember(2)]
+        [ProtoMember(2)]
         public string MicrosoftAuthor;
 
-        [JsonProperty("mgr"), ProtoMember(3)]
+        [ProtoMember(3)]
         public string Manager;
 
-        [JsonProperty("d"), ProtoMember(4)]
+        [ProtoMember(4)]
         public DateTime? Date;
 
         delegate void OnValueParsed(ref Metadata metadata, string value);

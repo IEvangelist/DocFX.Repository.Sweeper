@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Linq;
 using static System.String;
 
 namespace DocFX.Repository.Extensions
@@ -6,10 +8,18 @@ namespace DocFX.Repository.Extensions
     // Inspired by: https://www.rosettacode.org/wiki/Soundex#C.23
     public static class SoundEx
     {
+        static readonly ConcurrentDictionary<string, string> SoundCache =
+            new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
         const string SoundExAlphabet = "0123012#02245501262301#202";
 
         public static string Encode(string word)
         {
+            if (SoundCache.TryGetValue(word, out var soundEx))
+            {
+                return soundEx;
+            }
+
             var soundexString = Empty;
             var lastSoundexChar = '?';
             word = word.ToUpper();
@@ -38,7 +48,7 @@ namespace DocFX.Repository.Extensions
                 lastSoundexChar = thisSoundexChar;
             }
 
-            return soundexString.PadRight(4, '0');
+            return SoundCache.GetOrAdd(word, soundexString.PadRight(4, '0'));
         }
 
         public static int Difference(string left, string right)
@@ -84,19 +94,19 @@ namespace DocFX.Repository.Extensions
                 var sub4 = soundex1[1];
                 if (soundex2.IndexOf(sub4) > -1)
                 {
-                    ++ result;
+                    ++result;
                 }
 
                 var sub5 = soundex1[2];
                 if (soundex2.IndexOf(sub5) > -1)
                 {
-                    ++ result;
+                    ++result;
                 }
 
                 var sub6 = soundex1[3];
                 if (soundex2.IndexOf(sub6) > -1)
                 {
-                    ++ result;
+                    ++result;
                 }
             }
 

@@ -1,4 +1,5 @@
-﻿using CommandLine;
+﻿using DocFX.Repository.Extensions;
+using CommandLine;
 using System;
 using System.IO;
 

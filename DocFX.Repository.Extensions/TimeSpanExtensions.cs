@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DocFX.Repository.Sweeper
+namespace DocFX.Repository.Extensions
 {
     // Inspired/Borrowed from: https://stackoverflow.com/a/21649465/2410379
-    static class TimeSpanExtensions
+    public static class TimeSpanExtensions
     {
         static readonly SortedList<long, string> CutOff = new SortedList<long, string>
         {
@@ -18,7 +18,7 @@ namespace DocFX.Repository.Sweeper
             [long.MaxValue] = "{0:D}, {1:H}"
         };
 
-        internal static string ToHumanReadableString(this TimeSpan ts)
+        public static string ToHumanReadableString(this TimeSpan ts)
         {
             var find =
                 CutOff.Keys
@@ -70,7 +70,7 @@ namespace DocFX.Repository.Sweeper
                     var parts = format.Split(':');
                     if (parts[0] == "P")
                     {
-                        var partIndex = (arg.ToString() == "1") ? 2 : 1;
+                        var partIndex = arg.ToString() == "1" ? 2 : 1;
                         return $"{arg} {(parts.Length > partIndex ? parts[partIndex] : "")}";
                     }
                 }

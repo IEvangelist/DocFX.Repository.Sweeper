@@ -1,5 +1,7 @@
 ﻿using DocFX.Repository.Extensions;
+using DocFX.Repository.Sweeper.OpenPublishing;
 using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace DocFX.Repository.SweeperTests
@@ -50,5 +52,20 @@ namespace DocFX.Repository.SweeperTests
 
         [Fact]
         public void DifferenceTest() => Assert.Equal(4, SoundEx.Difference("fereri", "Ferrari"));
+
+        [
+            Theory,
+            InlineData("powerhshell", "powershell, powershell-interactive, prolog", false),
+            InlineData("JScript.NET", "", false),
+            InlineData("JScript.NET", "craftcms, fortran, javascript, protobuf, thrift", true)
+        ]
+        public void FindPossibleIntendedAlternativesTest(string input, string expected, bool kindOfSoundsLike)
+            => Assert.Equal(
+                expected, 
+                string.Join(
+                    ", ",
+                    Taxonomies.UniqueMonikers
+                              .Where(moniker => kindOfSoundsLike ? moniker.SoundsKindOfLike(input) : moniker.SoundsLike(input))
+                              .OrderBy(m => m)));
     }
 }
