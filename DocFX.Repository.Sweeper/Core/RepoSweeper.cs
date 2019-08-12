@@ -194,8 +194,9 @@ namespace DocFX.Repository.Sweeper.Core
 
                 if (options.Delete)
                 {
+                    long bytesDeleted = 0;
                     var deletedFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                    foreach (var (file, token) in 
+                    foreach (var (file, info) in 
                         files.Where(kvp => !string.IsNullOrWhiteSpace(kvp.Key))
                              .Where(kvp => File.Exists(kvp.Key))
                              .OrderBy(kvp => kvp.Key))
@@ -206,9 +207,10 @@ namespace DocFX.Repository.Sweeper.Core
 
                             if (!File.Exists(file) && deletedFiles.Add(file))
                             {
+                                bytesDeleted += info.FileSizeInBytes;
                                 if (options.OutputWarnings)
                                 {
-                                    type.WriteLine($"Deleted {file} - {token.Header.ToString()}.");
+                                    type.WriteLine($"Deleted {file} - {info.Header.ToString()}.");
                                 }
                             }
 
@@ -227,7 +229,7 @@ namespace DocFX.Repository.Sweeper.Core
                         await _redirectionAppender.ApplyRedirectsAsync(deletedFiles, options);
                     }
 
-                    type.WriteLine($"Deleted {deletedFiles.Count:#,#} {type} files.");
+                    type.WriteLine($"Deleted {deletedFiles.Count:#,#} {type} files a total of {bytesDeleted.FromBytesToString()}.");
                 }
 
                 Console.WriteLine();

@@ -38,6 +38,9 @@ namespace DocFX.Repository.Sweeper.Core
         [JsonProperty("c"), ProtoMember(8)]
         public IDictionary<int, string> CodeFenceSlugs => _codeFenceSlugs ?? (_codeFenceSlugs = new Dictionary<int, string>());
 
+        [JsonProperty("s"), ProtoMember(9)]
+        public long FileSizeInBytes { get; internal set; }
+
         [JsonIgnore]
         public int TotalReferences => TopicsReferenced.Count + ImagesReferenced.Count;
 
@@ -63,7 +66,8 @@ namespace DocFX.Repository.Sweeper.Core
                 LastWriteTime = fileInfo.LastWriteTime,
                 DirectoryName = fileInfo.DirectoryName,
                 FilePath = fileInfo.FullName,
-                FileType = fileInfo.GetFileType()
+                FileType = fileInfo.GetFileType(),
+                FileSizeInBytes = fileInfo.Length
             };
 
         public override string ToString()
@@ -97,6 +101,7 @@ namespace DocFX.Repository.Sweeper.Core
             FileType = fileToken.FileType;
             Header = fileToken.Header;
             LastWriteTime = fileToken.LastWriteTime;
+            FileSizeInBytes = fileToken.FileSizeInBytes;
             ImagesReferenced.UnionWith(fileToken.ImagesReferenced);
             TopicsReferenced.UnionWith(fileToken.TopicsReferenced);
         }

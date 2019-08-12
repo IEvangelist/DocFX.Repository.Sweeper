@@ -21,7 +21,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		sweeper-logo.png = sweeper-logo.png
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocFX.Repository.Extensions", "DocFX.Repository.Extensions\DocFX.Repository.Extensions.csproj", "{6E8C4D90-946B-4B16-B3A6-4B31671C27F1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocFX.Repository.Extensions", "DocFX.Repository.Extensions\DocFX.Repository.Extensions.csproj", "{6E8C4D90-946B-4B16-B3A6-4B31671C27F1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocFX.Repository.Services", "DocFX.Respository.Services\DocFX.Repository.Services.csproj", "{D5E12B99-DC21-4CCC-94CC-FCF03F180533}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,6 +43,10 @@ Global
 		{6E8C4D90-946B-4B16-B3A6-4B31671C27F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6E8C4D90-946B-4B16-B3A6-4B31671C27F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6E8C4D90-946B-4B16-B3A6-4B31671C27F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D5E12B99-DC21-4CCC-94CC-FCF03F180533}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5E12B99-DC21-4CCC-94CC-FCF03F180533}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5E12B99-DC21-4CCC-94CC-FCF03F180533}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5E12B99-DC21-4CCC-94CC-FCF03F180533}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
