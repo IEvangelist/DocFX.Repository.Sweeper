@@ -11,21 +11,21 @@ namespace DocFX.Repository.SweeperTests
 {
     public class FileTokenTests
     {
-        // Uncomment to do explicit testing of actual files.
-        [Fact]
-        public async Task TestExplicitFileAsync()
-        {
-            var dir = @"C:\Users\dapine\source\repos\AspNetCore.Docs\aspnetcore\tutorials\first-mvc-app";
-            FileToken token = new FileInfo($"{dir}\\adding-controller.md");
-            await token.InitializeAsync(new Options
-            {
-                EnableCaching = false,
-                SourceDirectory = dir
-            });
+        //// Uncomment to do explicit testing of actual files.
+        //[Fact]
+        //public async Task TestExplicitFileAsync()
+        //{
+        //    var dir = @"C:\Users\dapine\source\repos\AspNetCore.Docs\aspnetcore\fundamentals\servers";
+        //    FileToken token = new FileInfo($"{dir}\\httpsys.md");
+        //    await token.InitializeAsync(new Options
+        //    {
+        //        EnableCaching = false,
+        //        SourceDirectory = dir
+        //    });
 
-            Assert.NotNull(token);
-            Assert.Equal(8, token.ImagesReferenced.Count);
-        }
+        //    Assert.NotNull(token);
+        //    Assert.Equal(4, token.ImagesReferenced.Count);
+        //}
 
         [Fact]
         public async Task ReadAndWriteProtoBufTest()

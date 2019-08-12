@@ -30,7 +30,8 @@ namespace DocFX.Repository.Sweeper.Core
             {
                 filePath = await EnsureValidFilePathAsync(options, filePath);
                 if (string.IsNullOrWhiteSpace(filePath) ||
-                    filePath.StartsWith("http", StringComparison.OrdinalIgnoreCase) ||
+                    filePath.StartsWith("http:", StringComparison.OrdinalIgnoreCase) ||
+                    filePath.StartsWith("https:", StringComparison.OrdinalIgnoreCase) ||
                     filePath.IndexOfAny(InvalidPathCharacters) != -1)
                 {
                     return (false, null);
@@ -69,7 +70,8 @@ namespace DocFX.Repository.Sweeper.Core
         static async ValueTask<string> EnsureValidFilePathAsync(Options options, string filePath)
         {
             var config = await options.GetConfigAsync();
-            if (filePath.StartsWith("http", StringComparison.OrdinalIgnoreCase) &&
+            if (filePath.StartsWith("http:", StringComparison.OrdinalIgnoreCase) ||
+                filePath.StartsWith("https:", StringComparison.OrdinalIgnoreCase) &&
                 FileExtensionInUrlRegex.IsMatch(filePath))
             {
                 if (_blackListedExtensions.Contains(Path.GetExtension(filePath)))
@@ -87,7 +89,8 @@ namespace DocFX.Repository.Sweeper.Core
                     filePath = filePath.Replace($"{options.HostUri}/", "");
                 }
 
-                if (filePath.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                if (filePath.StartsWith("http:", StringComparison.OrdinalIgnoreCase) ||
+                    filePath.StartsWith("https:", StringComparison.OrdinalIgnoreCase))
                 {
                     return null;
                 }
