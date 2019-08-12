@@ -36,10 +36,21 @@ namespace DocFX.Repository.Sweeper.Core
                     return (false, null);
                 }
 
-                var path = directory.MergePath(filePath).NormalizePathDelimitors();
-                if (FileExtensionRegex.IsMatch(path))
+                if (filePath.StartsWith("~/"))
                 {
-                    return (File.Exists(path), path);
+                    var path = options.DocFxJsonDirectory.FullName.MergePath(filePath.Substring(2)).NormalizePathDelimitors();
+                    if (FileExtensionRegex.IsMatch(path))
+                    {
+                        return (File.Exists(path), path);
+                    }
+                }
+                else
+                {
+                    var path = directory.MergePath(filePath).NormalizePathDelimitors();
+                    if (FileExtensionRegex.IsMatch(path))
+                    {
+                        return (File.Exists(path), path);
+                    }
                 }
 
                 var files = Directory.GetFiles(directory, $"{filePath}.*");

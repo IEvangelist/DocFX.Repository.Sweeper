@@ -133,7 +133,7 @@ namespace DocFX.Repository.Sweeper
                 return (type, value);
             }
 
-            var cleaned = StripQueryStringOrHeaderLink(value).Replace("~", "..");
+            var cleaned = StripQueryStringOrHeaderLink(value);
             var unescaped = Uri.UnescapeDataString(cleaned);
 
             return (type, unescaped);

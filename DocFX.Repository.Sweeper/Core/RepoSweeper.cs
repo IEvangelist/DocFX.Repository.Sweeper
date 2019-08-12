@@ -229,7 +229,7 @@ namespace DocFX.Repository.Sweeper.Core
                         await _redirectionAppender.ApplyRedirectsAsync(deletedFiles, options);
                     }
 
-                    type.WriteLine($"Deleted {deletedFiles.Count:#,#} {type} files a total of {bytesDeleted.FromBytesToString()}.");
+                    type.WriteLine($"Deleted {deletedFiles.Count:#,#} {type} files, a total of {bytesDeleted.FromBytesToString()}.");
                 }
 
                 Console.WriteLine();

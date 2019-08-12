@@ -1,5 +1,4 @@
-﻿using Octokit.GraphQL;
-using Octokit.GraphQL.Model;
+﻿using Octokit.GraphQL.Model;
 using System.Threading.Tasks;
 
 namespace DocFX.Repository.Services

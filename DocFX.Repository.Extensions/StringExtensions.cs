@@ -75,6 +75,11 @@ namespace DocFX.Repository.Extensions
                 return null;
             }
 
+            if (Path.IsPathRooted(filePath))
+            {
+                return filePath;
+            }
+
             if (filePath.StartsWith("~") || filePath.StartsWith(".."))
             {
                 return Path.Combine(directory, filePath);

@@ -24,8 +24,8 @@ namespace DocFX.Repository.Services
         {
             _logger = logger;
             _config = config?.Value ?? throw new ArgumentNullException(nameof(config));
-            _owner = _config.Owner ?? "dotnet";
-            _repo = _config.Repo ?? "docs";
+            _owner = _config.Owner;
+            _repo = _config.Repo;
 
             _connection = new Connection(new ProductHeaderValue(ProductID, ProductVersion), _config.ApiToken);
         }

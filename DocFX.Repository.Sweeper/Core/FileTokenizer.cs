@@ -15,10 +15,7 @@ namespace DocFX.Repository.Sweeper.Core
         public async ValueTask<(Status, IDictionary<FileType, IList<FileToken>>)> TokenizeAsync(Options options)
         {
             var dirUri = options.DirectoryUri;
-            var dir =
-                options.ExplicitScope
-                    ? options.Directory
-                    : new DirectoryInfo(options.SourceDirectory).TraverseToFile("docfx.json");
+            var dir = options.ExplicitScope ? options.Directory : options.DocFxJsonDirectory;
 
             if (dir is null)
             {

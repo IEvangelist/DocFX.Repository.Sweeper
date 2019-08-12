@@ -8,17 +8,21 @@ namespace DocFX.Repository.Sweeper
     public class Options
     {
         readonly Lazy<DirectoryInfo> _sourceDirectory;
+        readonly Lazy<DirectoryInfo> _docFxJsonDirectory;
         readonly Lazy<Uri> _directoryUri;
         readonly Lazy<Uri> _hostUri;
 
         public Options()
         {
             _sourceDirectory = new Lazy<DirectoryInfo>(() => new DirectoryInfo(SourceDirectory));
+            _docFxJsonDirectory = new Lazy<DirectoryInfo>(() => new DirectoryInfo(SourceDirectory).TraverseToFile("docfx.json"));
             _directoryUri = new Lazy<Uri>(() => new Uri(SourceDirectory));
             _hostUri = new Lazy<Uri>(() => new Uri(HostUrl));
         }
 
         public DirectoryInfo Directory => _sourceDirectory.Value;
+
+        public DirectoryInfo DocFxJsonDirectory => _docFxJsonDirectory.Value;
 
         public string NormalizedDirectory => Directory?.FullName.NormalizePathDelimitors() ?? null;
 
