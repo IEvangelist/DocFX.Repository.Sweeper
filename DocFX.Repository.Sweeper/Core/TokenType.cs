@@ -4,6 +4,7 @@
     {
         Unrecognizable,
         FileReference,
-        CodeFence
+        CodeFence,
+        Xref
     }
 }

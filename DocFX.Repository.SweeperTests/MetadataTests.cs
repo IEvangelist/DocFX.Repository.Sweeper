@@ -42,5 +42,28 @@ namespace DocFX.Repository.SweeperTests
                 Assert.Equal(expectedDate, metadata.Date);
             }
         }
+
+        [Fact]
+        public void MetadataTryParseCorrectlyParsesAll()
+        {
+            var parsed =
+                Metadata.TryParse(new[]
+                {
+                    "uid: azure/dev-ops",
+                    "ms.date: 07/7/1984",
+                    "author:IEvangelist",
+                    "ms.author: dapine",
+                    "manager:nitinme"
+                },
+                out var metadata);
+
+            Assert.True(parsed);
+            Assert.NotEqual(default, metadata);
+            Assert.Equal("IEvangelist", metadata.GitHubAuthor);
+            Assert.Equal("dapine", metadata.MicrosoftAuthor);
+            Assert.Equal("nitinme", metadata.Manager);
+            Assert.Equal(new DateTime(1984, 7, 7), metadata.Date);
+            Assert.Equal("azure/dev-ops", metadata.Uid);
+        }
     }
 }

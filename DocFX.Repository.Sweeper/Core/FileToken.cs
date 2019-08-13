@@ -14,50 +14,48 @@ namespace DocFX.Repository.Sweeper.Core
     {
         IDictionary<int, string> _codeFenceSlugs;
 
-        [JsonProperty("h"), ProtoMember(1)]
+        [ProtoMember(1)]
         public Metadata Header { get; set; }
 
-        [JsonProperty("d"), ProtoMember(2)]
+        [ProtoMember(2)]
         public string DirectoryName { get; internal set; }
 
-        [JsonProperty("fp"), ProtoMember(3)]
+        [ProtoMember(3)]
         public string FilePath { get; internal set; }
 
-        [JsonProperty("ft"), ProtoMember(4)]
+        [ProtoMember(4)]
         public FileType FileType { get; internal set; }
 
-        [JsonProperty("lwt"), ProtoMember(5)]
+        [ProtoMember(5)]
         public DateTime LastWriteTime { get; internal set; }
 
-        [JsonProperty("t"), ProtoMember(6)]
+        [ProtoMember(6)]
         public ISet<string> TopicsReferenced { get; } = new HashSet<string>();
 
-        [JsonProperty("i"), ProtoMember(7)]
+        [ProtoMember(7)]
         public ISet<string> ImagesReferenced { get; } = new HashSet<string>();
 
-        [JsonProperty("c"), ProtoMember(8)]
+        [ProtoMember(8)]
         public IDictionary<int, string> CodeFenceSlugs => _codeFenceSlugs ?? (_codeFenceSlugs = new Dictionary<int, string>());
 
-        [JsonProperty("s"), ProtoMember(9)]
+        [ProtoMember(9)]
         public long FileSizeInBytes { get; internal set; }
 
-        [JsonIgnore]
+        [ProtoMember(10)]
+        public ISet<string> Xrefs { get; } = new HashSet<string>();
+
         public int TotalReferences => TopicsReferenced.Count + ImagesReferenced.Count;
 
-        [JsonIgnore]
         public bool IsRelevant => FileType != FileType.NotRelevant && FileType != FileType.Json;
 
-        [JsonIgnore]
         public bool IsMarkedForDeletion { get; internal set; }
 
-        [JsonIgnore]
         public IEnumerable<(int, string)> UnrecognizedCodeFenceSlugs
             => _codeFenceSlugs is null
                 ? Enumerable.Empty<(int, string)>()
                 : _codeFenceSlugs.Where(kvp => !Taxonomies.UniqueMonikers.Contains(kvp.Value) && !kvp.Value.Contains("```"))
                                  .Select(kvp => (kvp.Key, kvp.Value));
 
-        [JsonIgnore]
         public bool ContainsInvalidCodeFenceSlugs => UnrecognizedCodeFenceSlugs.Any();
 
         public static implicit operator FileToken(FileInfo fileInfo) =>

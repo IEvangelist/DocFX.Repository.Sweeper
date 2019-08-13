@@ -43,6 +43,12 @@ namespace DocFX.Repository.Sweeper
                             continue;
                         }
 
+                        if (tokenType == TokenType.Xref)
+                        {
+                            token.Xrefs.Add(tokenValue);
+                            continue;
+                        }
+
                         if (tokenType == TokenType.Unrecognizable)
                         {
                             continue;
@@ -88,12 +94,21 @@ namespace DocFX.Repository.Sweeper
 
                 if (match.Groups.Any(grp => grp.Name == "link"))
                 {
-                    yield return (TokenType.FileReference, match.Groups["link"].Value);
+                    var value = match.Groups["link"].Value;
+                    yield return (GetTokenType(value), value);
                 }
 
                 foreach (Group group in match.Groups)
                 {
-                    yield return (TokenType.FileReference, group.Value);
+                    var value = group.Value;
+                    yield return (GetTokenType(value), value);
+                }
+
+                TokenType GetTokenType(string tokenValue)
+                {
+                    return tokenValue?.StartsWith("xref:", StringComparison.OrdinalIgnoreCase) ?? false
+                        ? TokenType.Xref
+                        : TokenType.FileReference;
                 }
             }
 
@@ -123,7 +138,7 @@ namespace DocFX.Repository.Sweeper
             {
                 value = value.Substring(2);
             }
-            else if (value.StartsWith("xref:"))
+            else if (value.StartsWith("xref:", StringComparison.OrdinalIgnoreCase))
             {
                 value = value.Substring(5);
             }

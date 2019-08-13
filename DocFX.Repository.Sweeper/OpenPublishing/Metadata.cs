@@ -17,6 +17,7 @@ namespace DocFX.Repository.Sweeper.OpenPublishing
         static readonly Regex MicrosoftAuthorRegex = new Regex(@"ms.author:\s*\b(?'author'.+?)$", Options);
         static readonly Regex ManagerRegex = new Regex(@"\Amanager:\s*\b(?'manager'.+?)$", Options);
         static readonly Regex DateTimeRegex = new Regex(@"ms.date:\s*\b(?'date'.+?)$", Options);
+        static readonly Regex UniversalIdentiferRegex = new Regex(@"uid:\s*\b(?'uid'.+?)$", Options);
 
         [ProtoMember(1)]
         public string GitHubAuthor;
@@ -29,6 +30,9 @@ namespace DocFX.Repository.Sweeper.OpenPublishing
 
         [ProtoMember(4)]
         public DateTime? Date;
+
+        [ProtoMember(5)]
+        public string Uid;
 
         delegate void OnValueParsed(ref Metadata metadata, string value);
 
@@ -55,6 +59,10 @@ namespace DocFX.Repository.Sweeper.OpenPublishing
             if (hasValue)
             {
                 details.Add($"Date: {date.ToShortDateString()}");
+            }
+            if (!string.IsNullOrWhiteSpace(Uid))
+            {
+                details.Add($"Uid: {Uid}");
             }
 
             return string.Join(", ", details);
@@ -87,6 +95,10 @@ namespace DocFX.Repository.Sweeper.OpenPublishing
                     continue;
                 }
                 if (TryFindNamedGroupValue(ref metadata, ManagerRegex, line, "manager", delegate (ref Metadata md, string manager) { md.Manager = manager; }))
+                {
+                    continue;
+                }
+                if (TryFindNamedGroupValue(ref metadata, UniversalIdentiferRegex, line, "uid", delegate (ref Metadata md, string uid) { md.Uid = uid; }))
                 {
                     continue;
                 }

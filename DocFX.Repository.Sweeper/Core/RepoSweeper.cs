@@ -58,7 +58,29 @@ namespace DocFX.Repository.Sweeper.Core
                 Spinner.Start($"Scoping \"{type}\" file workload.", spinner =>
                 {
                     spinner.Color = ConsoleColor.Blue;
-                    count = tokens.Count();
+                    if (type == FileType.Markdown)
+                    {
+                        // Map topic references from Xrefs.
+                        var uidToFilePathMap =
+                            tokens.Where(t => !string.IsNullOrWhiteSpace(t.Header.Uid))
+                                  .ToDictionary(t => t.Header.Uid, t => t.FilePath, StringComparer.OrdinalIgnoreCase);
+                        foreach (var token in tokens)
+                        {
+                            ++ count;
+                            foreach (var uid in token.Xrefs)
+                            {
+                                if (uidToFilePathMap.TryGetValue(uid, out var filePath))
+                                {
+                                    token.TopicsReferenced.Add(filePath);
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        count = tokens.Count();
+                    }
+
                     spinner.Succeed();
                 }, Patterns.Arc);
 
@@ -182,13 +204,15 @@ namespace DocFX.Repository.Sweeper.Core
             switch (token.FileType)
             {
                 case FileType.Markdown:
-                    // Markdown files named "f1*.md" are whitelisted.
-                    isWhiteListed = Path.GetFileNameWithoutExtension(token.FilePath)
-                                        .Contains("f1", StringComparison.OrdinalIgnoreCase);
+                    // Markdown files named "f1*.md" or in our whitelisting are whitelisted.
+                    var fileName = Path.GetFileNameWithoutExtension(token.FilePath);
+                    isWhiteListed =
+                        fileName.Contains("f1", StringComparison.OrdinalIgnoreCase) ||
+                        Whitelist.FileNames.Any(name => string.Equals(fileName, name, StringComparison.OrdinalIgnoreCase));
                     break;
                 case FileType.Image:
                     // Image files in wwwroot, sample or snippet directories are whitelisted.
-                    isWhiteListed = token.FilePath.ContainsAny(References.WhiteListedDirectoryNames);
+                    isWhiteListed = token.FilePath.ContainsAny(Whitelist.DirectoryNames);
                     break;
             }
 
