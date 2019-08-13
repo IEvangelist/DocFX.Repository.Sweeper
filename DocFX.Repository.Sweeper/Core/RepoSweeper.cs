@@ -81,6 +81,11 @@ namespace DocFX.Repository.Sweeper.Core
                             var relative = options.DirectoryUri.ToRelativePath(token.FilePath);
                             progressBar.Tick($"{type} files: {relative}");
 
+                            if (IsTokenWhiteListed(token))
+                            {
+                                return;
+                            }
+
                             if (IsTokenReferencedAnywhere(token, allTokensInMap))
                             {
                                 return;
@@ -163,6 +168,29 @@ namespace DocFX.Repository.Sweeper.Core
                 }
 
                 ConsoleColor.DarkMagenta.WriteLine($"Warnings written to: {path}");
+            }
+        }
+
+        static bool IsTokenWhiteListed(FileToken token)
+        {
+            if (token is null)
+            {
+                return true;
+            }
+
+            switch (token.FileType)
+            {
+                case FileType.Markdown:
+                    // Markdown files named "f1*.md" are whitelisted.
+                    return Path.GetFileNameWithoutExtension(token.FilePath)
+                               .Contains("f1", StringComparison.OrdinalIgnoreCase);
+                case FileType.Image:
+                    // Image files in sample directories are whitelisted.
+                    return token.FilePath
+                                .IndexOf("sample", StringComparison.OrdinalIgnoreCase) != -1;
+
+                default:
+                    return false;
             }
         }
 
