@@ -178,20 +178,21 @@ namespace DocFX.Repository.Sweeper.Core
                 return true;
             }
 
+            var isWhiteListed = false;
             switch (token.FileType)
             {
                 case FileType.Markdown:
                     // Markdown files named "f1*.md" are whitelisted.
-                    return Path.GetFileNameWithoutExtension(token.FilePath)
-                               .Contains("f1", StringComparison.OrdinalIgnoreCase);
+                    isWhiteListed = Path.GetFileNameWithoutExtension(token.FilePath)
+                                        .Contains("f1", StringComparison.OrdinalIgnoreCase);
+                    break;
                 case FileType.Image:
-                    // Image files in sample directories are whitelisted.
-                    return token.FilePath
-                                .IndexOf("sample", StringComparison.OrdinalIgnoreCase) != -1;
-
-                default:
-                    return false;
+                    // Image files in wwwroot, sample or snippet directories are whitelisted.
+                    isWhiteListed = token.FilePath.ContainsAny(References.WhiteListedDirectoryNames);
+                    break;
             }
+
+            return isWhiteListed;
         }
 
         static bool IsTokenWithinScopedDirectory(FileToken token, string sourceDir)

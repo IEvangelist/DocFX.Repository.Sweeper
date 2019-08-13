@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace DocFX.Repository.Extensions
@@ -105,5 +106,10 @@ namespace DocFX.Repository.Extensions
 
             return string.Join(Path.DirectorySeparatorChar.ToString(), segments);
         }
+
+        public static bool ContainsAny(this string value, IEnumerable<string> values) =>
+            !string.IsNullOrWhiteSpace(value)
+                ? values?.Any(v => !string.IsNullOrWhiteSpace(v) && value.IndexOf(v, StringComparison.OrdinalIgnoreCase) >= 0) ?? false
+                : false;
     }
 }
