@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace DocFX.Repository.Sweeper.Core
 {
-    static class Whitelist
+    static class Whitelisted
     {
         static internal IEnumerable<string> FileNames { get; } =
             new List<string>

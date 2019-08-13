@@ -208,11 +208,11 @@ namespace DocFX.Repository.Sweeper.Core
                     var fileName = Path.GetFileNameWithoutExtension(token.FilePath);
                     isWhiteListed =
                         fileName.Contains("f1", StringComparison.OrdinalIgnoreCase) ||
-                        Whitelist.FileNames.Any(name => string.Equals(fileName, name, StringComparison.OrdinalIgnoreCase));
+                        Whitelisted.FileNames.Any(name => string.Equals(fileName, name, StringComparison.OrdinalIgnoreCase));
                     break;
                 case FileType.Image:
                     // Image files in wwwroot, sample or snippet directories are whitelisted.
-                    isWhiteListed = token.FilePath.ContainsAny(Whitelist.DirectoryNames);
+                    isWhiteListed = token.FilePath.ContainsAny(Whitelisted.DirectoryNames);
                     break;
             }
 
