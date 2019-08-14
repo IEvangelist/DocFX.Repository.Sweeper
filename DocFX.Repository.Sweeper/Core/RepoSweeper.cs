@@ -193,9 +193,9 @@ namespace DocFX.Repository.Sweeper.Core
             }
         }
 
-        static bool IsTokenWhiteListed(FileToken token)
+        internal static bool IsTokenWhiteListed(FileToken token)
         {
-            if (token is null)
+            if (token is null || !token.IsRelevant)
             {
                 return true;
             }
@@ -219,10 +219,10 @@ namespace DocFX.Repository.Sweeper.Core
             return isWhiteListed;
         }
 
-        static bool IsTokenWithinScopedDirectory(FileToken token, string sourceDir)
+        internal static bool IsTokenWithinScopedDirectory(FileToken token, string sourceDir)
             => token?.FilePath?.IndexOf(sourceDir, StringComparison.OrdinalIgnoreCase) != -1;
 
-        static bool IsTokenReferencedAnywhere(FileToken fileToken, IEnumerable<FileToken> tokens)
+        internal static bool IsTokenReferencedAnywhere(FileToken fileToken, IEnumerable<FileToken> tokens)
             => tokens.Where(token => !ReferenceEquals(token, fileToken))
                      .Any(otherToken => otherToken.HasReferenceTo(fileToken));
 

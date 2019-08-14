@@ -65,7 +65,7 @@ namespace DocFX.Repository.Sweeper.Core
                 DirectoryName = fileInfo.DirectoryName,
                 FilePath = fileInfo.FullName,
                 FileType = fileInfo.GetFileType(),
-                FileSizeInBytes = fileInfo.Length
+                FileSizeInBytes = fileInfo.Exists ? fileInfo.Length : 0
             };
 
         public override string ToString()
