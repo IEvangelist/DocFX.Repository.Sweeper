@@ -178,18 +178,27 @@ namespace DocFX.Repository.Sweeper.Core
 
         static async ValueTask WriteMarkdownWarningsAsync(IDictionary<FileType, IList<FileToken>> tokenMap)
         {
-            var path = Path.GetFullPath("warning.txt");
+            var path = Path.GetFullPath("unrecognized-code-slugs.txt");
             using (var writer = new StreamWriter(path))
             {
-                foreach (var warning in
-                    tokenMap[FileType.Markdown].Where(md => md.ContainsInvalidCodeFenceSlugs)
-                                               .OrderBy(md => md.FilePath)
-                                               .Select(md => md.GetUnrecognizedCodeFenceWarnings()))
+                var warnings =
+                    tokenMap[FileType.Markdown].Where(md => md.ContainsInvalidCodeFenceSlugs
+                                                         && md.Header.IsParsed)
+                                               .OrderBy(md => md.Header.Manager
+                                                           ?? md.Header.MicrosoftAuthor
+                                                           ?? md.Header.GitHubAuthor)
+                                               .ThenByDescending(md => md.Header.Date)
+                                               .ThenBy(md => md.FilePath)
+                                               .Select(md => md.GetUnrecognizedCodeFenceWarnings())
+                                               .ToList();
+
+                await writer.WriteLineAsync($"Found {warnings.Count:#,#} files with unrecognized code slugs.");
+                foreach (var warning in warnings)
                 {
                     await writer.WriteLineAsync(warning);
                 }
 
-                ConsoleColor.DarkMagenta.WriteLine($"Warnings written to: {path}");
+                ConsoleColor.DarkMagenta.WriteLine($"Warnings written to \"{path}\"");
             }
         }
 

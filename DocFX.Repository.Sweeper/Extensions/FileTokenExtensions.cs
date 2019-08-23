@@ -209,10 +209,34 @@ namespace DocFX.Repository.Sweeper
             builder.AppendLine($"    Has {token.UnrecognizedCodeFenceSlugs.Count():#,#} unrecognized code fence slugs.");
             foreach (var (line, slug) in token.UnrecognizedCodeFenceSlugs)
             {
-                builder.AppendLine($"    line number {line:#,#} has {slug}");
+                var suggestions = FindSuggestionsForUnrecognizedSlug(slug);
+                builder.AppendLine($"    line number {line,5:#,#}: \"{slug}\" {suggestions}");
             }
 
             return builder.ToString();
+        }
+
+        static string FindSuggestionsForUnrecognizedSlug(string unrecognizedSlug)
+        {
+            if (string.IsNullOrWhiteSpace(unrecognizedSlug))
+            {
+                return string.Empty;
+            }
+
+            var suggestions =
+                string.Join(
+                    ", ",
+                    Taxonomies.UniqueMonikers
+                              .Where(moniker => unrecognizedSlug.SoundsLike(moniker))
+                              .Distinct()
+                              .OrderBy(_ => _)
+                              .Select(moniker => $"\"{moniker}\""));
+
+            return string.IsNullOrWhiteSpace(suggestions)
+                ? string.Empty
+                : suggestions.Contains(",")
+                    ? $"- possible alternatives {suggestions}"
+                    : $"- possible alternative {suggestions}";
         }
     }
 }

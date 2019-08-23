@@ -36,7 +36,7 @@ namespace DocFX.Repository.Sweeper.OpenPublishing
 
         delegate void OnValueParsed(ref Metadata metadata, string value);
 
-        bool IsParsed
+        internal bool IsParsed
             => !string.IsNullOrWhiteSpace(GitHubAuthor)
             && !string.IsNullOrWhiteSpace(MicrosoftAuthor);
 

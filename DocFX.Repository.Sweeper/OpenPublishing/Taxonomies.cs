@@ -140,7 +140,6 @@ namespace DocFX.Repository.Sweeper.OpenPublishing
                 "cos",
                 "cls",
                 "cmake",
-                "cmake.in",
                 "coq",
                 "csp",
                 "css",
@@ -381,7 +380,11 @@ namespace DocFX.Repository.Sweeper.OpenPublishing
         static readonly ISet<string> WhiteListed =
             new HashSet<string>(StringComparer.OrdinalIgnoreCase)
             {
-                "yml"
+                "yml",
+                "output",
+                "plaintext",
+                "text",
+                "error"
             };
     }
 
