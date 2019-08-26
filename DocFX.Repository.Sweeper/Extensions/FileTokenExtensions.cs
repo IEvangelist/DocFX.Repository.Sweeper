@@ -113,7 +113,7 @@ namespace DocFX.Repository.Sweeper
             }
 
             foreach (var value in
-                expressions.SelectMany(ex => ex.Matches(line))
+                expressions.SelectMany((ex, index) => ex.Matches(line))
                            .SelectMany(GetMatchingValues))
             {
                 var (tokenType, tokenValue) = CleanMatching(value);
