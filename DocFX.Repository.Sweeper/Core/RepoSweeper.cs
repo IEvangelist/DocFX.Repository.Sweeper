@@ -1,5 +1,6 @@
-﻿using Kurukuru;
-using DocFX.Repository.Extensions;
+﻿using DocFX.Repository.Extensions;
+using Kurukuru;
+using ServiceStack;
 using ShellProgressBar;
 using System;
 using System.Collections.Concurrent;
@@ -16,16 +17,22 @@ namespace DocFX.Repository.Sweeper.Core
         readonly FileTokenizer _fileTokenizer = new FileTokenizer();
         readonly RedirectionAppender _redirectionAppender = new RedirectionAppender();
 
+        ConcurrentBag<(int, FileToken)> _freshnessTokens;
+
+        ConcurrentBag<(int, FileToken)> FreshnessTokens => _freshnessTokens ?? (_freshnessTokens = new ConcurrentBag<(int, FileToken)>());
+
         public async ValueTask<SweepSummary> SweepAsync(Options options, Stopwatch stopwatch)
         {
-            broadenSweep:
+            broadenSweep: // label for usage of "goto", can't go recursive as variables stack.
 
             var orphanedImages = new ConcurrentDictionary<string, FileToken>(StringComparer.OrdinalIgnoreCase);
             var orphanedTopics = new ConcurrentDictionary<string, FileToken>(StringComparer.OrdinalIgnoreCase);
 
             ConsoleColor.Green.WriteLine($"\nSearching \"{options.SourceDirectory}\" for orphaned files.");
 
-            var (status, tokenMap) = await _fileTokenizer.TokenizeAsync(options);
+            var today = DateTime.Now.Date;
+            var config = await options.GetConfigAsync();
+            var (status, tokenMap) = await _fileTokenizer.TokenizeAsync(options, config);
             if (status == Status.Error)
             {
                 status.WriteLine($"Unexpected error... early exit.");
@@ -44,7 +51,7 @@ namespace DocFX.Repository.Sweeper.Core
                         .OrderBy(type => type))
             {
                 if (type == FileType.Image && !options.FindOrphanedImages ||
-                    type == FileType.Markdown && !options.FindOrphanedTopics)
+                    type == FileType.Markdown && !options.FindOrphanedTopics && !options.ReportFreshness)
                 {
                     continue;
                 }
@@ -58,7 +65,7 @@ namespace DocFX.Repository.Sweeper.Core
                 Spinner.Start($"Scoping \"{type}\" file workload.", spinner =>
                 {
                     spinner.Color = ConsoleColor.Blue;
-                    if (type == FileType.Markdown)
+                    if (type == FileType.Markdown && !options.ReportFreshness)
                     {
                         // Map topic references from Xrefs.
                         var uidToFilePathMap =
@@ -102,6 +109,23 @@ namespace DocFX.Repository.Sweeper.Core
                         {
                             var relative = options.DirectoryUri.ToRelativePath(token.FilePath);
                             progressBar.Tick($"{type} files: {relative}");
+
+                            if (options.ReportFreshness && token.Header.IsParsed && token.Header.HasValidDate)
+                            {
+                                if (!IsTokenWithinScopedDirectory(token, options.NormalizedDirectory))
+                                {
+                                    return;
+                                }
+
+
+                                var difference = (token.Header.Date.Value - today).Days;
+                                if (difference <= -80) // Eighty days out, so we have 10 to "keep it fresh"
+                                {
+                                    FreshnessTokens.Add((difference, token));
+                                }
+
+                                return;
+                            }
 
                             if (IsTokenWhiteListed(token))
                             {
@@ -153,6 +177,11 @@ namespace DocFX.Repository.Sweeper.Core
                 }
             }
 
+            if (options.ReportFreshness)
+            {
+                await WriteFreshnessReportAsync(FreshnessTokens, today, options.HostUrl, config.Build.Dest);
+            }
+
             if (options.FindOrphanedTopics)
             {
                 await HandleOrphanedFilesAsync(orphanedTopics, FileType.Markdown, options);
@@ -174,6 +203,31 @@ namespace DocFX.Repository.Sweeper.Core
                 TotalFilesProcessed = tokenMap.SelectMany(kvp => kvp.Value).Count(),
                 TotalCrossReferences = tokenMap.Select(kvp => kvp.Value.Sum(t => t.TotalReferences)).Sum()
             };
+        }
+
+
+        static async ValueTask WriteFreshnessReportAsync(
+            IEnumerable<(int, FileToken)> tokens,
+            DateTime today,
+            string hostUrl,
+            string destination)
+        {
+            if (tokens.Any())
+            {
+                var path = Path.GetFullPath($"freshness-{today:yyyyMMdd}.csv");
+                using (var writer = new StreamWriter(path))
+                {
+                    var freshnessTokens =
+                        tokens.OrderBy(_ => _.Item1)
+                              .ThenBy(_ => _.Item2.FilePath)
+                              .Select(tuple => FileTokenFreshness.FromToken(tuple.Item2, tuple.Item1, hostUrl, destination))
+                              .ToList();
+
+                    await writer.WriteAsync(freshnessTokens.ToCsv());
+                }
+
+                ConsoleColor.DarkMagenta.WriteLine($"Freshness written to \"{path}\"");
+            }
         }
 
         static async ValueTask WriteMarkdownWarningsAsync(IDictionary<FileType, IList<FileToken>> tokenMap)

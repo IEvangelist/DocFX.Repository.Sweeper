@@ -49,6 +49,7 @@ The **sweeper** executable is a `.NET Core` project and can be executed from the
 | `-t` | If true, finds orphaned topic (markdown) files | `false` |
 | `-i` | If true, finds orphaned image files (.png, .jpg, .jpeg, .gif, .svg) | `false` |
 | `-d` | If true, deletes orphaned markdown or image files | `false` |
+| `-f` | If true, will report out freshness in the form of a 'freshness-yyyMMdd.csv' | `false` | 
 | `-l` | The number of files to limit for a given sweep (if not specified will eagerly delete all possible) | not specified |
 | `-o` | If true, writes various warnings to the standard output | `false` |
 | `-r` | If true, writes redirections of deleted files to `.openpublishing.redirection.json` | `false` |

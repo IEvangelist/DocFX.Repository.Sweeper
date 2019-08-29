@@ -48,6 +48,9 @@ namespace DocFX.Repository.Sweeper
         [Option('d', "delete", HelpText = "If true, deletes orphaned markdown or image files.")]
         public bool Delete { get; set; }
 
+        [Option('f', "freshness", HelpText = "If true, will report out freshness in the form of a 'freshness-yyyMMdd.csv'.")]
+        public bool ReportFreshness { get; set; }
+
         [Option('o', "outputWarnings", HelpText = "If true, writes various warnings to the standard output.")]
         public bool OutputWarnings { get; set; }
 

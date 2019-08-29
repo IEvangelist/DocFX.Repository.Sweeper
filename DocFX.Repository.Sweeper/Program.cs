@@ -1,7 +1,9 @@
 ﻿using CommandLine;
 using DocFX.Repository.Extensions;
 using DocFX.Repository.Sweeper.Core;
+using ServiceStack.Text;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;

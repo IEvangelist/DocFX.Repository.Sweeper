@@ -2,7 +2,7 @@
   "profiles": {
     "DocFX.Repository.Sweeper": {
       "commandName": "Project",
-      "commandLineArgs": "--cache --delete --images --directory \"C:\\Users\\dapine\\source\\repos\\AspNetCore.Docs\\aspnetcore\""
+      "commandLineArgs": "-f -e -c -s \"C:\\Repos\\azure-docs-pr\\articles\\cognitive-services\""
     }
   }
 }

@@ -7,16 +7,16 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using DocFX.Repository.Sweeper.OpenPublishing;
 
 namespace DocFX.Repository.Sweeper.Core
 {
     public class FileTokenizer
     {
-        public async ValueTask<(Status, IDictionary<FileType, IList<FileToken>>)> TokenizeAsync(Options options)
+        public async ValueTask<(Status, IDictionary<FileType, IList<FileToken>>)> TokenizeAsync(Options options, DocFxConfig config)
         {
             var dirUri = options.DirectoryUri;
             var dir = options.ExplicitScope ? options.Directory : options.DocFxJsonDirectory;
-
             if (dir is null)
             {
                 return (Status.Error, null);
@@ -35,12 +35,12 @@ namespace DocFX.Repository.Sweeper.Core
             }, Patterns.Arc);
 
             var tokens = new ConcurrentBag<FileToken>();
-            var config = await options.GetConfigAsync();
             var destination = config.Build.Dest;
 
             using (var progressBar = new ProgressBar(count, "Tokenizing files..."))
             {
-                await dir.EnumerateFiles("*.*", SearchOption.AllDirectories)
+                var searchPattern = options.ReportFreshness ? "*.md" : "*.*";
+                await dir.EnumerateFiles(searchPattern, SearchOption.AllDirectories)
                          .ForEachAsync(
                     Environment.ProcessorCount,
                     async fileInfo =>
@@ -61,8 +61,6 @@ namespace DocFX.Repository.Sweeper.Core
             {
                 ConsoleColor.Green.WriteLine($"Materialized {cachedCount:#,#} file tokens from the local cache rather than re-reading and parsing them.");
             }
-
-
 
             return (Status.Success, tokens.GroupBy(t => t.FileType).ToDictionary(grp => grp.Key, grp => grp.ToList() as IList<FileToken>));
         }
