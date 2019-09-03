@@ -1,4 +1,5 @@
 ﻿using DocFX.Repository.Extensions;
+using DocFX.Repository.Sweeper.OpenPublishing;
 using Kurukuru;
 using ServiceStack;
 using ShellProgressBar;
@@ -28,7 +29,7 @@ namespace DocFX.Repository.Sweeper.Core
             var orphanedImages = new ConcurrentDictionary<string, FileToken>(StringComparer.OrdinalIgnoreCase);
             var orphanedTopics = new ConcurrentDictionary<string, FileToken>(StringComparer.OrdinalIgnoreCase);
 
-            ConsoleColor.Green.WriteLine($"\nSearching \"{options.SourceDirectory}\" for orphaned files.");
+            ConsoleColor.Green.WriteLine($"\nScanning \"{options.SourceDirectory}\" for relevant files.");
 
             var today = DateTime.Now.Date;
             var config = await options.GetConfigAsync();
@@ -110,37 +111,10 @@ namespace DocFX.Repository.Sweeper.Core
                             var relative = options.DirectoryUri.ToRelativePath(token.FilePath);
                             progressBar.Tick($"{type} files: {relative}");
 
-                            if (options.ReportFreshness && token.Header.IsParsed && token.Header.HasValidDate)
-                            {
-                                if (!IsTokenWithinScopedDirectory(token, options.NormalizedDirectory))
-                                {
-                                    return;
-                                }
-
-
-                                var difference = (token.Header.Date.Value - today).Days;
-                                if (difference <= -80) // Eighty days out, so we have 10 to "keep it fresh"
-                                {
-                                    FreshnessTokens.Add((difference, token));
-                                }
-
-                                return;
-                            }
-
-                            if (IsTokenWhiteListed(token))
-                            {
-                                return;
-                            }
-
-                            if (IsTokenReferencedAnywhere(token, allTokensInMap))
-                            {
-                                return;
-                            }
-
-                            if (!IsTokenWithinScopedDirectory(token, options.NormalizedDirectory))
-                            {
-                                return;
-                            }
+                            if (IsTokenReportingFreshness(options, token, today)) return;
+                            if (IsTokenWhiteListed(token)) return;
+                            if (IsTokenReferencedAnywhere(token, allTokensInMap)) return;
+                            if (!IsTokenWithinScopedDirectory(token, options.NormalizedDirectory)) return;
 
                             switch (token.FileType)
                             {
@@ -177,6 +151,24 @@ namespace DocFX.Repository.Sweeper.Core
                 }
             }
 
+            await HandlePostProcessingAsync(options, orphanedImages, orphanedTopics, today, config, tokenMap);
+
+            return new SweepSummary
+            {
+                Status = Status.Success,
+                TotalFilesProcessed = tokenMap.SelectMany(kvp => kvp.Value).Count(),
+                TotalCrossReferences = tokenMap.Select(kvp => kvp.Value.Sum(t => t.TotalReferences)).Sum()
+            };
+        }
+
+        async Task HandlePostProcessingAsync(
+            Options options,
+            IDictionary<string, FileToken> orphanedImages,
+            IDictionary<string, FileToken> orphanedTopics,
+            DateTime today,
+            DocFxConfig config, 
+            IDictionary<FileType, IList<FileToken>> tokenMap)
+        {
             if (options.ReportFreshness)
             {
                 await WriteFreshnessReportAsync(FreshnessTokens, today, options.HostUrl, config.Build.Dest);
@@ -196,15 +188,29 @@ namespace DocFX.Repository.Sweeper.Core
             {
                 await HandleOrphanedFilesAsync(orphanedImages, FileType.Image, options);
             }
-
-            return new SweepSummary
-            {
-                Status = Status.Success,
-                TotalFilesProcessed = tokenMap.SelectMany(kvp => kvp.Value).Count(),
-                TotalCrossReferences = tokenMap.Select(kvp => kvp.Value.Sum(t => t.TotalReferences)).Sum()
-            };
         }
 
+        bool IsTokenReportingFreshness(Options options, FileToken token, DateTime today)
+        {
+            if (options.ReportFreshness &&
+                token.Header.IsParsed &&
+                token.Header.HasValidDate)
+            {
+                if (IsTokenWithinScopedDirectory(token, options.NormalizedDirectory))
+                {
+                    // Eighty days out, so we have 10 days to "keep it fresh"
+                    var daysOld = (token.Header.Date.Value - today).Days;
+                    if (daysOld <= -80)
+                    {
+                        FreshnessTokens.Add((daysOld, token));
+                    }
+                }
+
+                return true;
+            }
+
+            return false;
+        }
 
         static async ValueTask WriteFreshnessReportAsync(
             IEnumerable<(int, FileToken)> tokens,
@@ -312,7 +318,7 @@ namespace DocFX.Repository.Sweeper.Core
                 {
                     long bytesDeleted = 0;
                     var deletedFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                    foreach (var (file, info) in 
+                    foreach (var (file, info) in
                         files.Where(kvp => !string.IsNullOrWhiteSpace(kvp.Key))
                              .Where(kvp => File.Exists(kvp.Key))
                              .OrderBy(kvp => kvp.Key))
