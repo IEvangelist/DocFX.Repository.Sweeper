@@ -1,10 +1,24 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace DocFX.Repository.Sweeper.Core
 {
     class FileTokenFreshness
     {
+        static readonly ISet<string> LinkTopics = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "article",
+            "quickstart",
+            "tutorial",
+            "overview",
+            "conceptual",
+            "landing-page",
+            "interactive-tutorial",
+            "hub-page",
+            "guide"
+        };
+
         public int DaysOld { get; set; }
         public DateTime NinetyDaysOldDate { get; set; }
         public DateTime PubDate { get; set; }
@@ -20,8 +34,9 @@ namespace DocFX.Repository.Sweeper.Core
 
         internal static FileTokenFreshness FromToken(
             FileToken token,
-            int daysOld, 
+            int daysOld,
             string hostUrl,
+            string source,
             string destination)
         {
             var header = token.Header;
@@ -40,7 +55,18 @@ namespace DocFX.Repository.Sweeper.Core
                 Subservice = header.Subservice
             };
 
-            // TODO: consider adding auto generated link
+            if (LinkTopics.Contains(header.Topic))
+            {
+                var index = token.FilePath.IndexOf(source);
+                var route =
+                    token.FilePath
+                         .Substring(index)
+                         .Replace(source, destination)
+                         .Replace(".md", "")
+                         .Replace("\\", "/");
+
+                tokenFreshness.Link = $"{hostUrl}/{route}";
+            }
 
             return tokenFreshness;
         }

@@ -171,7 +171,8 @@ namespace DocFX.Repository.Sweeper.Core
         {
             if (options.ReportFreshness)
             {
-                await WriteFreshnessReportAsync(FreshnessTokens, today, options.HostUrl, config.Build.Dest);
+                var source = config.Build.Content.ElementAtOrDefault(0)?.Src;
+                await WriteFreshnessReportAsync(FreshnessTokens, today, options.HostUrl, source, config.Build.Dest);
             }
 
             if (options.FindOrphanedTopics)
@@ -216,6 +217,7 @@ namespace DocFX.Repository.Sweeper.Core
             IEnumerable<(int, FileToken)> tokens,
             DateTime today,
             string hostUrl,
+            string source,
             string destination)
         {
             if (tokens.Any())
@@ -226,7 +228,7 @@ namespace DocFX.Repository.Sweeper.Core
                     var freshnessTokens =
                         tokens.OrderBy(_ => _.Item1)
                               .ThenBy(_ => _.Item2.FilePath)
-                              .Select(tuple => FileTokenFreshness.FromToken(tuple.Item2, tuple.Item1, hostUrl, destination))
+                              .Select(tuple => FileTokenFreshness.FromToken(tuple.Item2, tuple.Item1, hostUrl, source, destination))
                               .ToList();
 
                     await writer.WriteAsync(freshnessTokens.ToCsv());
